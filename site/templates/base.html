@@ -115,9 +115,9 @@ code {
             </div>
             {%- endif %}
             {% block "brand" %}
-            <a class="navbar-brand" href="/" title="${.settings.project_title}">
+            <a class="navbar-brand hidden-md hidden-sm" href="/" title="${.settings.project_title}">
                 {# <i class="fa fa-money"></i> #}
-                ${.settings.project_title} <span class="text-warning hidden-md hidden-sm">beta</span>
+                ${.settings.project_title} <span class="text-warning">beta</span>
             </a>
             {% endblock %}
 
