@@ -12,6 +12,8 @@
 
 
     <view libname="view.dashboard.balances" content="#content.dashboard.balances">
+        <db:get-required model="#Currency" let:slug=".app.settings.default_currency" dst="currency" />
+        <currency:get-default-account currency="currency"/>
         <currency:get-wallet dst="wallet"/>
         <db:query columns="#Currency,sum:#Account.balance" dst="balances"
             filter="#Account.id in wallet.accounts" orderby="#Account.currency.title"
