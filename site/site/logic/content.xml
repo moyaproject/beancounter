@@ -18,7 +18,7 @@
     <content libname="content.front" extends="#content.base">
         <include-css path="css/currency.css" from="currency" />
         <section name="body">
-            <node template="/intro.html" let:form="form" />
+            <node template="/intro.html" withscope="yes"/>
         </section>
     </content>
 

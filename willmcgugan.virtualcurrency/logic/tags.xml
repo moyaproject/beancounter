@@ -247,6 +247,12 @@
         </signature>
 
         <db:atomic>
+
+            <throw
+                exception="willmcgugan.currency.insufficient-funds"
+                msg="Not enough reserve to send by email"
+                if="account.spendable - amount lt 0" />
+
             <db:create model="#EmailReserve" dst="email"
                 let:sender="sender"
                 let:expire=".now + 7d"

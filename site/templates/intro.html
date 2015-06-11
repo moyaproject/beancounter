@@ -19,6 +19,14 @@
         For a limited time only, I will send you <b>100.00</b> of essentially worthless virtual currency. Just fill in this form:
         </p>
 
+        {% if insufficient %}
+        <div class="alert alert-danger">
+        <p><strong>No more currency!</strong></p>
+        <p>
+            There is a limited supply of EWVC, and I have given it all away. Please tweet <a href="https://twitter.com/willmcgugan">@willmcgugan</a> and let me know to mint some more.
+        </div>
+        {% else %}
+
         {% if form.ok %}
         <div class="alert alert-success">
         <p>
@@ -41,6 +49,8 @@
         {% else %}
         {% render form %}
         {% endif %}
+        {% endif %}
+
         {% endif %}
 
         <p class="text-warning">

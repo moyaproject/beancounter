@@ -31,6 +31,10 @@
                     amount="d:'100.00'"
                     reference="'Hacker News'"
                     notes="data:'/promo.txt'"/>
+                <catch exception="willmcgugan.currency.insufficient-funds">
+                    <let insufficient="yes" />
+                    <done/>
+                </catch>
                 <let expire_time=".now + 1d" />
                 <set-cookie name="ewvc3" value="${expire_time.isoformat}" maxage="1d" />
             </forms:validate>
