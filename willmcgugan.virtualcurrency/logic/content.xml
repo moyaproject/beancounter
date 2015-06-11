@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:w="http://moyaproject.com/widgets"
+      xmlns:html="http://moyaproject.com/html">
+
+    <!-- Content is a high level description of a page -->
+    <content libname="content.front" template="base.html">
+        <section name="body">
+        </section>
+    </content>
+
+    <content libname="content.currency.base" template="base.html">
+        <section name="nav">
+            <node template="navlinks.html" />
+        </section>
+    </content>
+
+    <content libname="content.dashboard.base" template="dashboard.html">
+        <section name="nav">
+            <node template="navlinks.html" let:page="page"/>
+        </section>
+    </content>
+
+</moya>

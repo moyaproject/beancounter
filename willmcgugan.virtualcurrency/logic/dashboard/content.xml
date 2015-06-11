@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:moya="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:w="http://moyaproject.com/widgets"
+      xmlns:html="http://moyaproject.com/html"
+      xmlns:c="http://willmcgugan.com/currency"
+      xmlns:blog="http://moyaproject.com/blog">
+
+
+    <content libname="content.dashboard" extends="#content.dashboard.base">
+        <title>Dashboard</title>
+        <include-css path="css/currency.css" />
+        <include-css path="css/font-awesome.min.css" from="moya.fontawesome" />
+    </content>
+
+    <content libname="content.dashboard.balances" extends="#content.dashboard">
+        <str dst="page">balances</str>
+        <section name="body">
+            <html:h2>
+                Balances
+                <html:small>total from all accounts</html:small>
+            </html:h2>
+        </section>
+        <section name="content">
+            <node template="balances.html" let:balances="balances"/>
+        </section>
+        <section name="side">
+            <blog:recent-posts/>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.accounts" extends="#content.dashboard">
+        <str dst="page">accounts</str>
+        <title>Account</title>
+        <json dst="columns">
+        {
+            "name": "#Account.name",
+            "number": "#Account.number",
+            "currency": "#Account.currency.title",
+            "balance": "#Account.balance"
+        }
+        </json>
+        <db:sort-map src="accounts" columns="columns"/>
+        <section name="content">
+            <html:h2>
+                Your Accounts
+                <w:button-link app="${.app.name}" size="sm" name="create_account" icon="plus">
+                    Open New Account
+                </w:button-link>
+            </html:h2>
+            <markdown>Your accounts and balances. Click an account name to view more information.</markdown>
+            <w:paginate auto="no" src="accounts">
+                <table class="table" xmlns="http://moyaproject.com/tables">
+                    <columns>
+                        <sort-header name="name">Name</sort-header>
+                        <sort-header name="number">ID</sort-header>
+                        <sort-header name="currency" if=".settings.multiple.bool">Currency</sort-header>
+                        <header>Notes</header>
+                        <sort-header name="balance" align="right">Balance</sort-header>
+                    </columns>
+                    <rows src="pagination.objects" dst="account">
+                        <cell>
+                            <w:link class="${account.default ? 'text-info' : ''}" app="${.app.name}" name="view_account" let:number="account.number">
+                                ${account.name}
+                            </w:link>
+                        </cell>
+                        <cell><html:tt>${account.number}</html:tt></cell>
+                        <cell><moya:render src="account.notes" target="html.linebreaks" /></cell>
+                        <cell><c:balance value="account.balance"/></cell>
+                    </rows>
+                </table>
+            </w:paginate>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.accounts.create" extends="#content.dashboard">
+        <title>Open Account</title>
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="accounts">Accounts</w:link>
+                <w:link name="create_account">Open</w:link>
+            </w:breadcrumbs>
+            <w:error if="fail">
+                Unable to create Account
+            </w:error>
+            <if test="success">
+                <w:success>
+                    <markdown>New Account **'${account.name}'** was opened successfully</markdown>
+                </w:success>
+                <w:button-link name="view_account" let:number="account.number">Account Details</w:button-link>
+            </if>
+            <else>
+                <render src="form"/>
+            </else>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.account.edit" extends="#content.dashboard">
+        <title>Edit Account</title>
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="accounts">Accounts</w:link>
+                <w:link name="view_account" let:number="account.number">${account.number}</w:link>
+                <w:link name="edit_account" let:number="account.number">Edit</w:link>
+            </w:breadcrumbs>
+            <if test="success">
+                <w:success>
+                    <markdown>
+                        **Your account was updated successfully**
+                    </markdown>
+                </w:success>
+                <w:button-link name="view_account" visual="primary" let:number="account.number">Return to Account</w:button-link>
+            </if>
+            <else>
+                <render src="form"/>
+            </else>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.account.view" extends="#content.dashboard">
+        <title>Account ${account.name}</title>
+
+        <get-url name="send" dst="send_url" query="back=.request.path"/>
+        <forms:get form="#form.send.quick" dst="quick_send_form"
+            style="basic"
+            method="post"
+            action="${send_url}"
+            let:account="account" />
+
+        <get-url name="transfer" dst="transfer_url" query="back=.request.path"/>
+        <forms:get form="#form.transfer.quick" dst="quick_transfer_form"
+            style="basic"
+            method="post"
+            action="${transfer_url}"
+            let:accounts="accounts"
+            let:account="account"/>
+
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="accounts">Accounts</w:link>
+                <w:link name="view_account" let:number="account.number">${account.number}</w:link>
+            </w:breadcrumbs>
+            <html:h2>
+                Account Details
+                <w:button-link name="edit_account" size="sm" icon="edit" let:number="account.number">
+                    Edit
+                </w:button-link>
+                <w:button-link if="not account.default" size="sm" icon="check" name="make_default" let:number="account.number">
+                    Make Default
+                </w:button-link>
+            </html:h2>
+            <w:info if="account.default">
+                <markdown>This is the *default* account for this currency. When a user sends you currency, it will be deposited in this account.</markdown>
+            </w:info>
+            <node template="accountinfo.html" withscope="yes"/>
+            <html:a name="transactions"/>
+            <html:h3>
+                Recent Transactions
+                <html:small>
+                    last 30 days of transactions
+                    <w:button-link size="sm" icon="eye-open" name="transactions" query="account=account.number">
+                        View All
+                    </w:button-link>
+                </html:small>
+            </html:h3>
+            <w:paginate src="transactions" auto="no" fragment="transactions">
+                <node template="transactions.html" let:account="account" let:transactions="pagination.objects" />
+            </w:paginate>
+
+        </section>
+        <section name="side">
+            <w:well>
+                <render src="quick_send_form" />
+            </w:well>
+            <w:well>
+                <render src="quick_transfer_form"/>
+            </w:well>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.transactions" extends="#content.dashboard">
+        <let-str page="transactions" />
+        <title>Transactions</title>
+
+        <forms:get form="#form.transaction_search" dst="transaction_search_form"/>
+
+        <forms:get form="#form.transaction_filter" dst="transaction_filter"
+            style="basic"
+            let:filter_month="filter_month"
+            let:filter_type="filter_type"
+            let:filter_account="filter_account"
+            let:accounts="accounts"/>
+        <json dst="columns">
+        {
+            "transaction":"#Transaction.identity",
+            "sent":"#Transaction.sent",
+            "sender":"#Transaction.sender.username",
+            "recipient":"#Transaction.recipient.username",
+            "account":"#Transaction.destination.name",
+            "in":"#Transaction.amount",
+            "out":"#Transaction.amount",
+            "reference":"#Transaction.reference"
+        }
+        </json>
+        <db:sort-map src="transactions" columns="columns"/>
+
+        <section name="side">
+            <render src="transaction_filter"/>
+        </section>
+
+        <section name="body">
+            <html:a name="transactions"/>
+            <html:h2>
+                Transactions
+                <html:small>information in detail</html:small>
+            </html:h2>
+        </section>
+
+        <section name="content">
+            <get-enum enum="#enum.transaction.type" dst="types"/>
+            <render src="transaction_search_form"/>
+            <let lastdate="None"/>
+            <w:paginate pagesize="20" auto="no" src="transactions" fragment="transactions">
+                <html:div class="transactions-container">
+                    <table class="transactions-table table" xmlns="http://moyaproject.com/tables">
+                        <columns>
+                            <sort-header name="sent" align="right">Date</sort-header>
+                            <sort-header name="transaction">ID</sort-header>
+                            <sort-header name="source">Acc1</sort-header>
+                            <sort-header name="account">Acc2</sort-header>
+                            <sort-header name="sender" hide="filter_type=='transfer'">From</sort-header>
+                            <sort-header name="recipient" hide="filter_type=='transfer'">To</sort-header>
+                            <sort-header name="reference" hide="filter_type=='transfer'">Ref</sort-header>
+                            <sort-header name="in" align="right" hide="filter_type=='transfer'">In</sort-header>
+                            <sort-header name="out" align="right" hide="filter_type=='transfer'">Out</sort-header>
+                            <sort-header name="amount" align="right" hide="filter_type not in ['transfer', 'all']">Amt</sort-header>
+                            <sort-header name="balance" align="right" hide="not filter_account">Bal</sort-header>
+                        </columns>
+                        <rows src="pagination.objects" dst="transaction">
+                            <cell>
+                                <html:span class="sent-time text-warning" if="transaction.sent.local.date != lastdate">${transaction.sent.local.date % 'medium'}</html:span>
+                                <moya:let lastdate="transaction.sent.local.date"/>
+                            </cell>
+                            <cell>
+                                <w:link name="view_transaction" let:identity="transaction.identity">
+                                    <html:tt>${transaction.identity}</html:tt>
+                                </w:link>
+                            </cell>
+                            <cell hide="filter_account and transaction.type == int:types.transfer and transaction.source.number == filter_account">
+                                <moya:render src="transaction.source" let:link="yes" if="transaction.source in accounts"/>
+                            </cell>
+                            <cell hide="filter_account and transaction.type == int:types.transfer and transaction.destination.number == filter_account">
+                                <moya:render src="transaction.destination" let:link="yes" if="transaction.destination in accounts"/>
+                            </cell>
+                            <cell><moya:render src="transaction.sender" let:link="yes" if="transaction.sender != .user"/></cell>
+                            <cell><moya:render src="transaction.recipient" let:link="yes" if="transaction.recipient != .user"/></cell>
+                            <cell>${transaction.reference or ''}</cell>
+                            <cell class="currency text-success">
+                                <moya:if test="transaction.destination|'canmanage' and not transaction.source|'canmanage'">${transaction.amount::',.2f'}</moya:if>
+                            </cell>
+                            <cell class="currency text-danger">
+                                <moya:if test="transaction.source|'canmanage' and not transaction.destination|'canmanage'">${transaction.amount::',.2f'}</moya:if>
+                            </cell>
+                            <cell hide="transaction.type != int:types.transfer" class="currency text-info">
+                                ${transaction.amount::',.2f'}
+                            </cell>
+                            <cell class="text-info">
+                                <moya:if test="transaction.source.number==filter_account">
+                                    ${transaction.source_balance|'amount'}
+                                </moya:if>
+                                <moya:elif test="transaction.destination.number==filter_account">
+                                    ${transaction.destination_balance|'amount'}
+                                </moya:elif>
+                            </cell>
+                        </rows>
+                    </table>
+                </html:div>
+            </w:paginate>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.transfer" extends="#content.dashboard">
+        <let-str page="transfer"/>
+        <title>Transfer Funds</title>
+        <section name="body">
+            <html:a name="transactions"/>
+            <html:h2>
+                Transfer
+                <html:small>move currency between accounts</html:small>
+            </html:h2>
+        </section>
+        <section name="content">
+            <render src="form"/>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.send" extends="#content.dashboard">
+        <let-str page="send"/>
+        <title>Send</title>
+        <section name="body">
+            <html:a name="transactions"/>
+            <html:h2>
+                Send
+                <html:small>send currency to a user or email address</html:small>
+            </html:h2>
+        </section>
+        <section name="content">
+            <render src="form"/>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.transfer.confirm" extends="#content.dashboard">
+        <title>Confirm Transfer</title>
+        <let-str page="transfer" />
+        <section name="content">
+            <if test="confirmed">
+                <w:success>
+                    <markdown>Transfer was successful</markdown>
+                </w:success>
+                <w:button-link name="transfer">Back to Transfer</w:button-link>
+            </if>
+            <if test="insufficient">
+                <w:error>
+                    <markdown>You have insufficient funds for this transfer!</markdown>
+                </w:error>
+            </if>
+            <render src="form" if="not confirmed"/>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.send.confirm" extends="#content.dashboard">
+        <title>Confirm</title>
+        <section name="content">
+            <if test="insufficient">
+                <w:error>
+                    <markdown>
+                        **You have insufficient funds to send!**
+
+                        You may send a maximum of ${send.account.balance|'amount'(currency=send.account.currency)}
+                    </markdown>
+                </w:error>
+            </if>
+            <elif test="fail">
+                <w:error>
+                    <markdown>
+                        **Unable to send email.**
+
+                        If the problem persists, please contact admin.
+                    </markdown>
+                </w:error>
+                <render src="form"/>
+            </elif>
+            <elif test="email">
+                <w:success>
+                    <markdown>
+                        You have successfully sent funds to **${email.email}**
+
+                        The recipient must click the link in the email to accept the funds.
+                    </markdown>
+                </w:success>
+                <w:button-link name="view_account" let:number="email.account.number">
+                    Back to Account
+                </w:button-link>
+            </elif>
+            <elif test="transaction">
+                <w:success>
+                    <markdown>
+                        You have successfully sent funds.
+
+                        Transaction reference: **${transaction.identity}**
+                    </markdown>
+                </w:success>
+                <w:button-link name="view_account" let:number="transaction.source.number">
+                    Back to Account
+                </w:button-link>
+                <w:button-link name="view_transaction" let:identity="transaction.identity">
+                    View transaction
+                </w:button-link>
+            </elif>
+            <else>
+                <render src="form" />
+            </else>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.claim" extends="#content.dashboard">
+        <title>Claim</title>
+        <section name="content">
+
+            <if test="claimed">
+                <w:error>
+                    <markdown>
+                        **Claim token not found!**
+
+                        The funds have either been claimed already, or the URL may be incorrect. Please check your email again.
+                    </markdown>
+                </w:error>
+            </if>
+            <else>
+                <if test="success">
+                    <w:success>
+                        <markdown>
+                            The funds have been transfered to your account.
+                        </markdown>
+                    </w:success>
+                    <w:button-link name="view_account" let:number="transaction.destination.number">
+                        View Account
+                    </w:button-link>
+                </if>
+                <else>
+                    <w:info>
+                        <markdown>
+                            You have received **${claim.amount|'amount'(currency=claim.account.currency)}** from **${render:claim.sender}**
+
+                            Click the button below to transfer these funds to your account.
+                        </markdown>
+                    </w:info>
+                    <render src="form"/>
+                </else>
+            </else>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.make_active" extends="#content.dashboard">
+        <title>Make Default</title>
+        <section name="content">
+            <render src="form"/>
+        </section>
+    </content>
+
+    <content libname="content.dashboard.transaction.view" extends="#content.dashboard">
+        <title>Transaction</title>
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="transactions">Transactions</w:link>
+                <w:link name="view_transaction" let:identity="transaction.identity">${transaction.identity}</w:link>
+            </w:breadcrumbs>
+            <node template="transaction.html" let:transaction="transaction"/>
+            <w:button-link name="transactions">
+                Back to Transactions
+            </w:button-link>
+            <w:button-link name="view_account" let:number="transaction.source|'canmanage' ? transaction.source.number : transaction.destination.number">
+                Back to Account
+            </w:button-link>
+        </section>
+    </content>
+
+</moya>

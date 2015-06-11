@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com">
+
+    <model libname="Currency" xmlns="http://moyaproject.com/db" template="objects/currency.html">
+
+        <uuid name="uuid" nstype="url" unique="yes"/>
+        <string name="title" length="100"/>
+        <text name="description" null="no" default="" markup="html"/>
+        <string name="slug" length="100" unique="yes"/>
+        <string name="unit_name_singular" label="Unit Name (singular)" null="no" length="30"/>
+        <string name="unit_name_plural" label="Unit Name (plural)" null="no" length="30"/>
+        <string name="unit_cent_name_singular" label="Unit Cent Name (singular)" length="30"/>
+        <string name="unit_cent_name_plural" label="Unit Cent Name (pluiral)" length="30"/>
+        <string name="symbol" null="no" length="8"/>
+        <integer name="dplaces" label="decimal places" default="2" />
+        <boolean name="public" default="yes" />
+        <decimal name="minted" default="0" blank="no" null="no"/>
+        <decimal name="circulation" default="0" blank="no" null="no"/>
+
+        <many-to-many name="bankers" model="moya.auth#User" picker="moya.auth#admintable.users"/>
+    </model>
+
+    <model libname="Wallet" xmlns="http://moyaproject.com/db">
+        <one-to-one name="user" model="moya.auth#User" picker="moya.auth#admintable.users"
+            backref="wallet"/>
+        <many-to-many name="accounts" model="#Account" picker="#admintable.accounts" orderby="name" />
+    </model>
+
+    <enum libname="enum.account.type" name="account_type">
+        <value id="0" name="user">User account</value>
+        <value name="mint">Mint account</value>
+    </enum>
+
+    <model libname="Account" xmlns="http://moyaproject.com/db" repr="account:${number}" template="objects/account.html">
+        <integer name="type" choices="#enum.account.type" null="no" default="0" blank="no" />
+        <datetime name="created" auto="yes" null="no" />
+        <foreign-key model="#Currency" name="currency" null="no" blank="no" />
+        <token name="number" null="no" blank="no" label="Account Number" unique="yes"
+            length="20" size="8" lowercase="yes" digits="yes" uppercase="no" />
+        <string name="name" length="30" null="yes" />
+        <decimal name="balance" default="0" blank="no"/>
+        <decimal name="reserved" default="0" blank="no"/>
+        <boolean name="default" default="no" />
+        <text name="notes" null="no" default="" />
+
+        <property name="spendable" expression="balance-reserved" />
+    </model>
+
+    <model libname="Pending" xmlns="http://moyaproject.com/db">
+        <datetime name="issued" auto="yes" null="no"/>
+        <datetime name="expires" null="yes"/>
+        <foreign-key model="#Account" name="sender" null="no" />
+        <decimal name="amount" default="0"/>
+        <text name="message" null="no" default=""/>
+    </model>
+
+    <enum libname="enum.transaction.type" name="transaction_type">
+        <value id="0" name="mint">Mint</value>
+        <value name="transfer">Transfer</value>
+        <value name="pay">Payment</value>
+    </enum>
+
+    <model libname="Transaction" xmlns="http://moyaproject.com/db" repr="transaction:${identity}">
+        <foreign-key name="currency" model="#Currency" null="no" />
+        <integer name="type" choices="#enum.transaction.type" null="no" default="2" blank="no" />
+        <token name="identity" null="no" blank="no" label="Account Number" unique="yes"
+            length="20" size="8" lowercase="yes" digits="yes" uppercase="no" />
+        <datetime name="sent" auto="yes" null="no" />
+        <foreign-key model="moya.auth#User" name="sender" picker="moya.auth#admintable.users"/>
+        <foreign-key model="moya.auth#User" name="recipient" picker="moya.auth#admintable.users" null="yes"/>
+
+        <decimal label="Source Balance" name="source_balance" null="no" blank="no" />
+        <decimal label="Destination Balance" name="destination_balance" null="no" blank="no" />
+
+        <foreign-key model="#Account" name="source" null="yes" picker="#admintable.accounts"/>
+        <foreign-key model="#Account" name="destination" null="no" picker="#admintable.accounts"/>
+        <decimal name="amount" null="no" blank="no" />
+        <string length="100" name="reference" null="yes" />
+        <text name="notes" null="yes" />
+        <decimal name="minted" null="yes" />
+    </model>
+
+    <model libname="Transfer" xmlns="http://moyaproject.com/db">
+        <uuid name="identity" unique="yes"/>
+        <foreign-key name="user" model="moya.auth#User" null="no" />
+        <datetime name="expire" null="no" />
+        <foreign-key model="#Account" name="account1" null="no"/>
+        <foreign-key model="#Account" name="account2" null="no" />
+        <decimal name="amount" null="no" blank="no" />
+        <text name="notes" null="yes" />
+    </model>
+
+    <model libname="Send" xmlns="http://moyaproject.com/db">
+        <uuid name="identity" unique="yes"/>
+        <string length="254" name="sent_to" null="yes" />
+        <foreign-key name="user" model="moya.auth#User" null="no" />
+        <foreign-key name="account" model="#Account" null="yes"/>
+
+        <foreign-key name="recipient" model="moya.auth#User" null="yes" />
+        <foreign-key name="recipient_account" model="#Account" null="yes"/>
+        <string name="email" length="254" null="yes" />
+
+        <datetime name="expire" null="no" />
+        <decimal name="amount" null="no" blank="no" />
+        <string length="100" name="reference" null="yes" />
+        <text name="notes" null="yes" />
+    </model>
+
+    <model libname="Notification" xmlns="http://moyaproject.com/db">
+        <foreign-key name="user" model="moya.auth#User" null="yes" />
+        <foreign-key name="account" model="#Account" null="yes" />
+        <foreign-key name="transaction" model="#Transaction" null="yes" />
+        <text name="text" null="no" />
+    </model>
+
+    <model libname="EmailReserve" xmlns="http://moyaproject.com/db">
+        <token name="token" null="no" blank="no" label="Claim token" unique="yes"
+            length="20" size="12" lowercase="yes" digits="yes" uppercase="no" />
+        <datetime name="sent_time" null="no" auto="yes"/>
+        <datetime name="expire" null="no" />
+        <string name="email" length="254" null="yes" />
+        <string name="name" length="100" null="yes" />
+        <foreign-key name="sender" model="moya.auth#User" null="yes" />
+        <foreign-key name="account" model="#Account" null="yes" />
+        <decimal name="amount" null="no" />
+        <string length="100" name="reference" null="yes" />
+        <text name="notes" null="yes" />
+    </model>
+
+    <model libname="Mint" xmlns="http://moyaproject.com/db">
+        <foreign-key name="currency" model="#Currency" null="no" />
+        <datetime name="expire" null="no" />
+        <uuid name="identity" unique="yes"/>
+        <foreign-key name="user" model="moya.auth#User" null="no" />
+        <decimal name="amount" null="no" blank="no" />
+        <text name="notes" null="yes" />
+    </model>
+
+</moya>

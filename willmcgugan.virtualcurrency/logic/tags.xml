@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:currency="http://willmcgugan.com/currency"
+      xmlns:email="http://moyaproject.com/email">
+    <!-- define your tags here -->
+
+    <tag name="get-wallet">
+        <doc>Get a user's wallet</doc>
+        <signature>
+            <attribute name="user" default=".user" />
+        </signature>
+        <return>
+            <db:get-or-create model="#Wallet" let:user="user"/>
+        </return>
+    </tag>
+
+
+    <tag name="move-funds">
+        <doc>
+            Move funds from one account to another, must be done in an atomic block
+
+            Returns a basic transaction object
+        </doc>
+        <signature>
+            <attribute name="account1"/>
+            <attribute name="account2"/>
+            <attribute name="amount"/>
+
+            <attribute name="type" type="text"/>
+            <attribute name="sender"/>
+            <attribute name="recipient" default="None"/>
+            <attribute name="reference" default="None"/>
+            <attribute name="notes" default="None"/>
+        </signature>
+
+        <db:atomic>
+            <db:get-exist model="#Account" let:id="account1.id" dst="acc1" forupdate="yes"/>
+            <db:get-exist model="#Account" let:id="account2.id" dst="acc2" forupdate="yes"/>
+
+            <throw
+                exception="bad-value.amount"
+                msg="amount must be greater than 0"
+                if="amount lte 0"/>
+            <throw
+                exception="willmcgugan.currency.insufficient-funds"
+                msg="account does not have enough funds to cover this transfer"
+                if="acc1.balance - amount lt 0"/>
+            <throw
+                exception="bad-value.account"
+                msg="accounts must be in the same currency"
+                if="acc1.currency != acc2.currency"/>
+            <let
+                acc1.balance="acc1.balance - amount"
+                acc2.balance="acc2.balance + amount"
+                source_balance="acc1.balance"
+                destination_balance="acc2.balance"
+                type="int:.app.enum.transaction_type[type]"/>
+
+            <db:create
+                model="#Transaction" dst="transaction"
+                let:currency="account1.currency"
+                let:type="type"
+                let:source="acc1"
+                let:destination="acc2"
+                let:source_balance="source_balance"
+                let:destination_balance="destination_balance"
+                let:amount="amount"
+                let:sender="sender"
+                let:recipient="recipient"
+                let:reference="reference"
+                let:notes="notes"/>
+
+            <return value="transaction"/>
+        </db:atomic>
+    </tag>
+
+    <tag name="return-reserve">
+        <doc>Return reserved currency</doc>
+        <signature>
+            <attribute name="reserve" />
+        </signature>
+        <db:atomic>
+            <db:get model="#EmailReserve" let:id="reserve.id" forupdate="yes" dst="reserve"/>
+            <return if="not reserve" />
+            <db:get model="#Account" let:id="reserve.account.id" forupdate="yes" dst="account" />
+            <return if="not account" />
+            <throw
+                exception="willmcgugan.currency.reserve-error"
+                msg="Can't return more money than the reserved"
+                if="account.reserved - reserve.amount lt 0"/>
+            <let account.reserved="account.reserved - reserve.amount" />
+            <db:delete src="reserve"/>
+        </db:atomic>
+        <return-true/>
+    </tag>
+
+    <tag name="mint">
+        <doc>Mint new currency</doc>
+        <signature>
+            <attribute name="currency"/>
+            <attribute name="amount"/>
+            <attribute name="notes"/>
+        </signature>
+        <db:atomic>
+            <db:get model="#Currency" let:id="currency.id" dst="currency" forupdate="yes"/>
+            <currency:get-mint-account currency="currency" dst="mint_account"/>
+            <let mint_account.balance="mint_account.balance + amount"
+                currency.minted="currency.minted + amount"/>
+            <db:create model="#Transaction" dst="transaction"
+                let:currency="currency"
+                let:type="int:.app.enum.transaction_type.mint"
+                let:sender=".user"
+                let:source="None"
+                let:destination="mint_account"
+                let:source_balance="0"
+                let:destination_balance="mint_account.balance"
+                let:minted="currency.minted"
+                let:amount="amount"
+                let:notes="notes"/>
+        </db:atomic>
+        <return value="transaction"/>
+    </tag>
+
+    <tag name="get-mint-account">
+        <doc>Get the account associated with a currency</doc>
+        <signature>
+            <attribute name="currency"/>
+        </signature>
+        <db:atomic>
+            <db:get-or-create model="#Account"
+                forupdate="yes"
+                let:currency="currency"
+                let:type="int:.app.enum.account_type.mint"
+                initial="{'name': currency.title + ' Mint'}"
+                dst="account"/>
+        </db:atomic>
+        <return value="account"/>
+    </tag>
+
+    <tag name="transfer">
+        <doc>transfer currency between accounts</doc>
+        <signature>
+            <attribute name="user"/>
+            <attribute name="account1"/>
+            <attribute name="account2"/>
+            <attribute name="amount"/>
+            <attribute name="reference" default="None" />
+            <attribute name="notes"/>
+        </signature>
+        <return>
+            <currency:move-funds
+                type="transfer"
+                account1="account1"
+                account2="account2"
+                amount="amount"
+                sender="user"
+                recipient="user"
+                reference="reference"
+                notes="notes"/>
+        </return>
+    </tag>
+
+    <tag name="get-default-account">
+        <doc>
+            Get or create a default account for a given user / currency
+        </doc>
+        <signature>
+            <attribute name="user"/>
+            <attribute name="currency"/>
+        </signature>
+        <currency:get-wallet user="user" dst="recipient_wallet" />
+
+        <db:atomic>
+            <db:get model="#Account" dst="account"
+                filter="#Account.id in recipient_wallet.accounts"
+                let:currency="currency"
+                let:default="yes" />
+            <if test="not account">
+                <db:create model="#Account" dst="account"
+                    let:user="user"
+                    let:currency="currency"
+                    let:default="yes"
+                    let:name="'Deposit'"/>
+                <append src="user.wallet.accounts" value="account" />
+            </if>
+        </db:atomic>
+        <return value="account" />
+    </tag>
+
+    <tag name="send-user">
+        <doc>
+            Send funds to a user.
+        </doc>
+        <signature>
+            <attribute name="user"/>
+            <attribute name="account"/>
+            <attribute name="recipient"/>
+            <attribute name="amount"/>
+            <attribute name="notes" default="None"/>
+            <attribute name="reference" default="None"/>
+        </signature>
+
+        <db:atomic>
+            <currency:get-default-account
+                dst="recipient_account"
+                user="recipient"
+                currency="account.currency"/>
+
+            <currency:move-funds type="pay"
+                account1="account"
+                account2="recipient_account"
+                amount="amount"
+                sender="user"
+                recipient="recipient"
+                notes="notes"
+                reference="reference"
+                dst="transaction"/>
+        </db:atomic>
+
+        <get-fq-url name="view_transaction"
+            let:identity="transaction.identity"
+            dst="transaction_url" />
+
+        <echo if=".debug">${transaction_url}</echo>
+        <email:send email="#email.send.user" if="recipient.email"
+            to="${recipient.email}"
+            let:transaction="transaction"
+            let:transaction_url="transaction_url"/>
+
+        <return value="transaction" />
+    </tag>
+
+    <tag name="send-email">
+        <doc>
+            Send funds by email.
+        </doc>
+        <signature>
+            <attribute name="email"/>
+            <attribute name="name"/>
+            <attribute name="sender"/>
+            <attribute name="account"/>
+            <attribute name="amount"/>
+            <attribute name="reference" default="None"/>
+            <attribute name="notes" default="None"/>
+        </signature>
+
+        <db:atomic>
+            <db:create model="#EmailReserve" dst="email"
+                let:sender="sender"
+                let:expire=".now + 7d"
+                let:email="email"
+                let:name="name"
+                let:account="account"
+                let:amount="amount"
+                let:reference="reference"
+                let:notes="notes" />
+
+            <let account.reserved="account.reserved + amount" />
+            <get-fq-url name="claim" let:token="email.token" dst="claim_url" />
+            <echo if=".debug">${claim_url}</echo>
+            <email:send email="#email.send"
+                to="${email.email}"
+                let:email="email"
+                let:claim_url="claim_url"/>
+        </db:atomic>
+        <return value="email"/>
+    </tag>
+
+    <tag name="send-account">
+        <doc>
+            Send directly to an account
+        </doc>
+        <signature>
+            <attribute name="user"/>
+            <attribute name="account"/>
+            <attribute name="recipient_account"/>
+            <attribute name="amount"/>
+            <attribute name="notes" default="None"/>
+            <attribute name="reference" default="None"/>
+        </signature>
+        <currency:move-funds
+            type="pay"
+            account1="account"
+            account2="recipient_account"
+            amount="amount"
+            sender="user"
+            notes="notes"
+            reference="reference"
+            dst="transaction"/>
+        <return value="transaction"/>
+    </tag>
+
+    <tag name="claim">
+        <doc>
+            Claim funds send by email.
+        </doc>
+        <signature>
+            <attribute name="claim"/>
+            <attribute name="accountno" default="None"/>
+        </signature>
+
+        <db:atomic>
+            <let amount="claim.amount"/>
+            <throw exception="willmcgugan.currency.insufficient-funds"
+                if="claim.account.balance - amount lt 0"
+                msg="sender hasn't enough funds to cover claim!" />
+
+            <if test="accountno">
+                <db:get model="#Account" src=".user.wallet.accounts" dst="account"
+                    let:number="accountno" />
+            </if>
+            <else>
+                <currency:get-default-account dst="account"
+                    user=".user"
+                    currency="claim.account.currency" />
+            </else>
+            <throw exception="willmcgugan.currency.no-account"
+                if="not account"
+                msg="Unable to find account #${accountno}" />
+
+            <currency:move-funds type="pay"
+                account1="claim.account"
+                account2="account"
+                amount="amount"
+                sender="claim.sender"
+                recipient=".user"
+                notes="claim.notes"
+                reference="claim.reference"
+                dst="transaction"/>
+            <let claim.account.reserved="claim.account.reserved + amount"/>
+
+            <db:delete src="claim" />
+        </db:atomic>
+
+        <return value="transaction" />
+    </tag>
+
+    <tag name="notify">
+        <doc>
+            Send the user a notification about an account
+        </doc>
+        <signature>
+            <attribute name="user" default=".user"/>
+            <attribute name="account" required="no"/>
+            <attribute name="transaction" required="no"/>
+        </signature>
+        <get-tag-text dst="text" sub="yes" />
+
+        <db:create model="#Notification" dst="notification"
+            let:user="user"
+            let:account="account"
+            let:transaction="transaction"
+            let:text="text"/>
+
+        <fire signal="willmcgugan.currency.notify" let:notification="notification" />
+        <return value="notification" />
+    </tag>
+
+</moya>

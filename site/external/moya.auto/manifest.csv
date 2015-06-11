@@ -1,0 +1,13 @@
+"path","md5","auth md5"
+"/lib.ini",2ad75a72fd6eba16442725b79b60aa67,9bbf1e085d598d37ef87d7077ac89fe2
+"/__init__.py",e54925e1ed3818adfd6c00bffa62f89d,07f2dead3bac69c65db162b2f4aba71c
+"/logic/rpc.xml",32f02a949559e42bce79d00aaa50e4eb,5b6279d8b5a536a81907189e6c9f6d40
+"/logic/widgets.xml",7996ab7f48a6a70e219b4a2ce5be56e6,95515574fc2451267b516e99776647bd
+"/logic/mountpoints.xml",6703d91ba99a9083677e6ea715018a86,d26ce9b68b0d43f862ed21681847fc29
+"/logic/readme.txt",c9b6ae3a72d38bce525f828d88a29f78,6c8d877e335ec732a80091f9f7990aa9
+"/locale/readme.txt",06c4fce01453459edb43d2857ebcc873,c44a09c4f28517782589988dd758c62e
+"/templates/moya.auto/results.html",eeabe486483a3013bb7faf96db947a77,6967b61f4cbbe8c9bfa68989873f223d
+"/templates/moya.auto/widgets/autocomplete.html",19e11ce026a774fc4e76fd625fc05082,85be7627894724fc70485853a583fd25
+"/media/readme.txt",ca958e537f29bc260e179537ce151dba,77e93fe2d9cd8aa606d603a8dbe35e93
+"/media/js/moya-autocomplete.js",8e92e442085ff75f488261d2a4bb316b,452e4b9baea41beb707479952a3cd4cf
+"/media/css/moya-autocomplete.css",7e18f13b12d906ef4ccfd1868e9d076f,0f829d72ef2486e3fe511436bcb1e51b

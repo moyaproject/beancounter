@@ -1,0 +1,13 @@
+<moya xmlns="http://moyaproject.com">
+
+    <filter name="amount" value="amount">
+        <let currency="account.currency" if="account" />
+        <return-str if="currency">${amount::',.2f'} ${currency.unit_name_plural}</return-str>
+        <return-str>${amount::',.2f'}</return-str>
+    </filter>
+
+    <filter name="canmanage" value="account">
+        <return value="account in .user.wallet.accounts" />
+    </filter>
+
+</moya>

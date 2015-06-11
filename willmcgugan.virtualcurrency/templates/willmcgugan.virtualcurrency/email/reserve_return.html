@@ -1,0 +1,43 @@
+{#
+Sent when emailed currency is un-claimed
+#}
+
+{% block "title" %}Unclaimed funds returned{% endblock %}
+
+{% block "content" %}
+<p>Dear ${reserve.sender.display_name},</p>
+<p>
+    The <strong>${reserve.amount|'amount'(currency=reserve.account.currency)}</strong>
+    you send to
+    {%- if reserve.name %}
+    <strong>${reserve.name}</strong> (${reserve.email})
+    {%- else %}
+    <strong>${reserve.email}</strong>
+    {%- end-if %}
+    was not claimed, and was returned to your account.
+</p>
+
+{%- if reserve.reference %}
+<p>
+The reference was: <tt>${reserve.reference}</tt>
+</p>
+{%- endif %}
+
+{%- if reserve.notes %}
+<p>You attached the following note:</p>
+<blockquote>
+<pre>${reserve.notes}</pre>
+</blockquote>
+{%- endif %}
+
+<p>
+    <a class="btn btn-primary" href="{% url 'view_account' with number=reserve.account.number %}">View your account</a>
+</p>
+
+<p>
+--<br/>
+<a href="${.request.host_url}">$(.settings.project_title}</a>
+</p>
+
+
+{% endblock %}

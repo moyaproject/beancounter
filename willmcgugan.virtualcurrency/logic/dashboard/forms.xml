@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+    xmlns:moya="http://moyaproject.com"
+    xmlns:db="http://moyaproject.com/db"
+    xmlns:let="http://moyaproject.com/let"
+    xmlns:wysihtml5="http://moyaproject.com/wysihtml5"
+    xmlns:forms="http://moyaproject.com/forms"
+    xmlns:w="http://moyaproject.com/widgets"
+    xmlns:html="http://moyaproject.com/html"
+    xmlns:auto="http://moyaproject.com/auto">
+
+    <form libname="form.account.create" xmlns="http://moyaproject.com/forms"
+        legend="Open Account" class="well" style="horizontal">
+        <hidden-input name="currency" initial="currency.uuid" />
+        <input src="name" dst="name" label="Name" name="name" maxlength="30" required="yes"
+            placeholder="A memorable name for your account" />
+        <checkbox label="Default?" name="default" src="default" dst="default"
+            text="Check to make this the default account when you are sent funds"/>
+        <text-area src="notes" dst="notes" label="Notes" name="notes" help="Your notes" />
+        <submit-button text="Open Account" />
+        <validate-field field="name">
+            <db:if-exists model="#Account" filter="#Account.id in .user.wallet.accounts and #Account.name == field">
+                <fail>
+                    You already have an account with this name, please pick another
+                </fail>
+            </db:if-exists>
+        </validate-field>
+    </form>
+
+    <form libname="form.account.edit" xmlns="http://moyaproject.com/forms"
+        legend="Edit Account" class="well" style="horizontal">
+        <hidden-input name="account" initial="account.number"/>
+        <input src="name" dst="name" label="Name" name="name" maxlength="30" required="yes"
+            placeholder="A memorable name for your account" />
+        <text-area src="notes" dst="notes" label="Notes" name="notes" help="Your notes" />
+        <forms:actions>
+            <submit-button text="Update" visual="success"/>
+            <w:button-link name="view_account" let:number="account.number">Cancel</w:button-link>
+        </forms:actions>
+        <validate-field field="name">
+            <db:if-exists model="#Account"
+                filter="#Account.id in .user.wallet.accounts and #Account.name == field and #Account.id != account.id">
+                <fail>
+                    You already have an account with this name, please pick another
+                </fail>
+            </db:if-exists>
+        </validate-field>
+    </form>
+
+    <forms:form libname="form.transfer" class="well" style="horizontal">
+
+        <forms:select name="account1" label="Transfer from" required="yes" initial="default_account.number or ''">
+            <for src="accounts" dst="account">
+                <forms:option value="${account.number}">${account.name} #${account.number}</forms:option>
+            </for>
+        </forms:select>
+
+        <forms:select name="account2" label="Transfer to" required="yes">
+            <forms:option value="">-- select account --</forms:option>
+            <for src="accounts" dst="account">
+                <forms:option value="${account.number}">${account.name} #${account.number}</forms:option>
+            </for>
+        </forms:select>
+
+        <forms:input name="amount" label="Amount" required="yes" placeholder="0.00"
+            help="including two decimal places, e.g. 12.34"/>
+        <forms:text-area name="notes" label="Notes" maxlength="4000"/>
+        <forms:submit-button text="Transfer" name="action" clicked="transfer" visual="success"/>
+
+        <forms:validate-field field="account2">
+            <forms:fail if="value==values.account1">
+                Can't transfer to the same account
+            </forms:fail>
+        </forms:validate-field>
+
+        <forms:validate-field field="amount">
+            <forms:fail if="not (value) matches /^\d+\.\d\d$/">
+                Invalid amount (don't forget to include two decimal places)
+            </forms:fail>
+            <forms:fail if="d:value lte 0">
+                Invalid amount
+            </forms:fail>
+            <db:get model="#Account" let:number="values.account1" dst="account"/>
+            <forms:fail if="d:value gt account.spendable">
+                Insufficient funds, you may send a maximum of ${account.spendable|'amount'(currency=account.currency)}.
+            </forms:fail>
+        </forms:validate-field>
+
+    </forms:form>
+
+    <forms:form libname="form.transfer.confirm">
+        <w:dialog>
+            <markdown>
+                Are you sure you wish to transfer **${transfer.amount|'amount'(currency=transfer.account1.currency)}**
+                from **${transfer.account1.name}** to **${transfer.account2.name}**?
+
+                If you click 'Transfer', the funds will be transfered between accounts immediately.
+            </markdown>
+            <w:dialog-buttons>
+                <forms:submit-button text="Transfer" name="action" visual="success" clicked="confirm"/>
+                <forms:submit-button text="Cancel" name="action" clicked="cancel"/>
+            </w:dialog-buttons>
+        </w:dialog>
+    </forms:form>
+
+    <forms:form libname="form.send.confirm">
+        <html:h3>Confirm Send</html:h3>
+        <w:info if="'@' in send.sent_to and send.recipient">
+            <markdown>
+                A user account (${render:send.recipient}) was found with email address *${send.sent_to}*
+            </markdown>
+        </w:info>
+
+        <w:dialog>
+            <if test="send.email">
+                <markdown>
+                    Are you sure you wish to send **${send.amount|'amount'(account=send.account)}** to email **${send.email}** ?
+
+                    If you click *Send*, the funds will sent to an email address.
+
+                    If the funds are unclaimed, they will be returned to your account after **7** days.
+                </markdown>
+                <html:p>
+                    <forms:input name="name" label="Name" placeholder="Recipient's name"
+                        inlinehelp="please enter a name"/>
+                </html:p>
+
+                <markdown>*Enter an optional name to include in the email*</markdown>
+
+            </if>
+
+            <markdown if="send.recipient">
+                Are you sure you wish to send **${send.amount|'amount'(account=send.account)}** to  **${render:send.recipient}** ?
+
+                If you click *Send*, the funds will be sent immediately.
+            </markdown>
+            <markdown if="send.recipient_account">
+                Are you sure you wish to send **${send.amount|'amount'(account=send.account)}** to  account **#${render:send.recipient_account.number}** ?
+
+                If you click *Send*, the funds will be sent immediately.
+            </markdown>
+            <w:dialog-buttons>
+                <forms:submit-button text="Send" name="action" visual="success" clicked="send"/>
+                <forms:submit-button text="Cancel" name="action" clicked="cancel"/>
+            </w:dialog-buttons>
+        </w:dialog>
+
+    </forms:form>
+
+    <macro libname="macro.autocomplete_recipient">
+        <auto:complete libname="input.recipient" field="recipient" xmlns="http://moyaproject.com" results_template="recipient_results.html">
+            <let input="last:partition:[input, '@']" if="input ^= '@'" />
+            <return if="len:input gt 1">
+                <db:query model="moya.auth#User" filter="moya.auth#User.username contains input" maxresults="20"/>
+            </return>
+            <return if="len:input == 1">
+                <db:query model="moya.auth#User" filter="moya.auth#User.username ^= input" maxresults="20"/>
+            </return>
+        </auto:complete>
+    </macro>
+
+    <forms:form libname="form.send" class="well" style="horizontal">
+
+        <forms:select name="account" label="Account" required="yes" initial="default_account.number or ''">
+            <for src="accounts" dst="account">
+                <forms:option value="${account.number}">${account.name} #${account.number}</forms:option>
+            </for>
+        </forms:select>
+
+        <forms:input name="recipient" label="Recipient" placeholder="@username or email" required="yes"/>
+        <defer to="#macro.autocomplete_recipient" />
+
+        <forms:input name="amount" label="Amount" required="yes" placeholder="0.00"
+            help="Including two decimal places, e.g. 12.34"/>
+
+        <forms:input name="reference" label="Reference" required="no" maxlength="100" />
+        <forms:text-area name="notes" label="Message" help="Your message to the recipient" maxlength="4000"/>
+        <forms:submit-button text="Send" name="action" clicked="send" visual="success"/>
+
+        <forms:validate-field field="recipient">
+            <forms:fail if="value == .user.username">
+                Can't send to yourself!
+            </forms:fail>
+        </forms:validate-field>
+
+        <forms:validate-field field="amount">
+            <forms:fail if="not (value) matches /^\d+\.\d\d$/">
+                Invalid amount (don't forget to include two decimal places)
+            </forms:fail>
+            <forms:fail if="d:value lte 0">
+                Invalid amount
+            </forms:fail>
+            <db:get model="#Account" let:number="values.account" dst="account"/>
+            <forms:fail if="d:value gt account.spendable">
+                Insufficient funds, you may send a maximum of ${account.spendable|'amount'(currency=account.currency)}.
+            </forms:fail>
+        </forms:validate-field>
+
+    </forms:form>
+
+    <forms:form libname="form.send.quick" style="inline" class="quick-send" csrf="no">
+        <forms:hidden-input name="_moya_csrf" initial="csrf:'willmcgugan.virtualcurrency#form.send'"/>
+        <forms:hidden-input name="account" initial="account.number"/>
+        <html:h4>Quick Send</html:h4>
+        <forms:input label="Amount" hidelabel="yes" name="amount" required="yes" placeholder="0.0"/>
+        <forms:input name="recipient" label="Recipient" hidelabel="yes" placeholder="@username or email" required="yes"/>
+        <defer to="#macro.autocomplete_recipient" />
+        <forms:input placeholder="reference" label="Reference" hidelabel="yes" name="reference" required="no"  />
+        <forms:input placeholder="message" label="Message" hidelabel="yes" name="notes" required="no" />
+        <forms:submit-button text="Send" name="action" clicked="send" block="yes" visual="success"/>
+    </forms:form>
+
+    <forms:form libname="form.transfer.quick" style="inline" class="quick-send" csrf="no">
+        <forms:hidden-input name="_moya_csrf" initial="csrf:'willmcgugan.virtualcurrency#form.transfer'"/>
+        <forms:hidden-input name="account" initial="account.number"/>
+        <html:h4>Quick Transfer</html:h4>
+        <forms:input label="Amount" hidelabel="yes" name="amount" required="yes" placeholder="0.0"/>
+
+        <forms:select name="account2" hidelabel="yes" label="Transfer to" required="yes">
+            <forms:option value="">-- select account --</forms:option>
+            <for src="accounts" dst="acc">
+                <forms:option value="${acc.number}" if="account != acc">${acc.name} #${acc.number}</forms:option>
+            </for>
+        </forms:select>
+
+        <forms:submit-button text="Transfer" name="action" clicked="send" block="yes" visual="success"/>
+    </forms:form>
+
+    <forms:form libname="form.claim" style="paragraphs">
+        <forms:field if="accounts.exists" name="account" required="no" initial="default_account.number or ''">
+            <forms:select>
+                <for src="accounts" dst="account">
+                    <forms:option value="${account.number}">${account.name} #${account.number}</forms:option>
+                </for>
+            </forms:select>
+        </forms:field>
+        <w:info if="not accounts">
+            An account will be automatically created.
+        </w:info>
+        <forms:actions>
+            <forms:submit-button text="Add to Account" clicked="claim"/>
+        </forms:actions>
+    </forms:form>
+
+    <forms:form libname="form.make_default">
+        <w:dialog>
+            <markdown>
+                Are you sure you want to make account **${account.name}** (#${account.number}) *default*?
+
+                When a user sends you currency, it will be deposited in your default account.
+            </markdown>
+            <w:dialog-buttons>
+                <forms:submit-button text="Make Default" name="action" clicked="make_default" visual="success"/>
+                <forms:submit-button text="Cancel" name="action" clicked="cancel" />
+            </w:dialog-buttons>
+        </w:dialog>
+    </forms:form>
+
+    <forms:form libname="form.transaction_search" method="get" csrf="no" style="basic">
+        <forms:hidden-input name="account" initial=".request.GET.account"/>
+        <forms:hidden-input name="type" initial=".request.GET.type"/>
+        <forms:hidden-input name="month" initial=".request.GET.month"/>
+        <forms:field name="q">
+            <w:search-input placeholder="search #transaction, @user, or reference" value=".request.GET.q"/>
+        </forms:field>
+    </forms:form>
+
+    <forms:form libname="form.transaction_filter" method="get" csrf="no" class="well" style="horizontal" legend="Filter Transactions">
+        <forms:hidden-input name="q" initial=".request.GET.q"/>
+        <forms:select label="Account" name="account" initial="filter_account">
+            <forms:option value="">-- all accounts --</forms:option>
+            <for src="accounts" dst="account">
+                <forms:option value="${account.number}">${account.name} (#${account.number})</forms:option>
+            </for>
+        </forms:select>
+        <forms:select label="Type" name="type" initial="filter_type">
+            <forms:option value="pay">Payments</forms:option>
+            <forms:option value="transfer">Transfers</forms:option>
+            <forms:option value="all">Payments + Transfers</forms:option>
+        </forms:select>
+        <forms:select label="Month" name="month" initial="filter_month">
+            <forms:option value="">-- all --</forms:option>
+            <for src="(.now.year)..2015" dst="year">
+                <forms:opt-group label="${year}">
+                    <for src="12..1" dst="month">
+                        <continue if="date:[year,month,1] gt .now" />
+                        <forms:option value="${year}-${month}-1">${date:[year, month, 1] % 'MMMM'} ${year}</forms:option>
+                    </for>
+                </forms:opt-group>
+            </for>
+        </forms:select>
+        <forms:actions>
+            <forms:submit-button text="Update" visual="info" block="yes"/>
+            <w:button-link name="transactions" block="yes">Reset</w:button-link>
+        </forms:actions>
+    </forms:form>
+
+</moya>

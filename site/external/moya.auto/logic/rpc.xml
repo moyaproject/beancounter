@@ -1,0 +1,48 @@
+<moya xmlns="http://moyaproject.com"
+    xmlns:let="http://moyaproject.com/let"
+    xmlns:rpc="http://moyaproject.com/jsonrpc">
+
+    <enum libname="enum.jsonrpc.errors">
+        <value id="1" name="invalid_completer">
+            The 'completer' value isn't valid
+        </value>
+    </enum>
+
+
+    <rpc:interface libname="jsonrpc.interface" errors="#enum.jsonrpc.errors">
+
+        <rpc:method name="complete">
+            <rpc:signature>
+                <rpc:parameter name="input" type="string" required="yes">Text to auto complete</rpc:parameter>
+                <rpc:parameter name="completer" type="string" required="yes">Completer ID</rpc:parameter>
+                <rpc:parameter name="params">Extra parameters for completer</rpc:parameter>
+            </rpc:signature>
+            <get-element name="${completer}" dst="completer_element" />
+
+            <!-- Check the completer references a tag of the right type -->
+            <!-- If we don't do this, it would be possible to execute arbitrary code! -->
+            <rpc:error code="invalid_completer" if="completer_element.tag_type != '{http://moyaproject.com/auto}complete'"/>
+
+            <cache-return keydata="[completer,input,params]">
+
+                <list dst="results"/>
+                <call macro="${completer_element.element_ref}" let:input="input" dst="results" if="input">
+                    <unpack obj="params" />
+                </call>
+
+                <let-str template="results.html" />
+                <!-- Resolve custom template path if required -->
+                <resolve-template if="completer_element.attributes.results_template"
+                    path="${completer_element.attributes.results_template}" from="${completer_element.app.name}" dst="template" />
+
+                <return-dict>
+                    <render-template template="${template}" let:results="results" dst="html"/>
+                    <let input="input"
+                        count="results ? len:results : 0" />
+                </return-dict>
+            </cache-return>
+
+        </rpc:method>
+
+    </rpc:interface>
+</moya>

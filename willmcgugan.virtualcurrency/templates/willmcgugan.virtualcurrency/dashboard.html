@@ -1,0 +1,43 @@
+{#
+Dashboard base templates
+
+Left column contains links to main sections
+#}
+
+{% extends "base.html" %}
+
+{% block 'css' %}
+<style>
+.list-toggle.active:after
+{
+    content: "\f105" !important;
+}
+</style>
+
+{% endblock %}
+
+
+{% block "body" append %}
+
+{% def 'link' %}
+<li role="presentation" {% attrib class=[page==id ? 'active' : None] %}>
+    <a href="{% url url %}">{% if icon %}<i class="fa fa-${icon}"></i> {% endif %}${text}</a>
+</li>
+{% enddef %}
+
+<div class="row">
+    {% if sections.side %}
+    <div class="col-md-9">
+        {% render sections.content %}
+    </div>
+    <div class="col-md-3">
+        {% render sections.side %}
+    </div>
+    {% else %}
+    <div class="col-md-12">
+        {% render sections.content %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

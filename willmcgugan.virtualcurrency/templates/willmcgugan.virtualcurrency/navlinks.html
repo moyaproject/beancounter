@@ -1,0 +1,14 @@
+{% def 'link' %}
+<li role="presentation" {% attrib class=[page==id ? 'active' : None] %}>
+    <a href="{% url url %}">{% if icon %}<i class="fa fa-${icon} hidden-sm"></i> {% endif %}${text}</a>
+</li>
+{% enddef %}
+
+<ul class="nav navbar-nav">
+{% call 'link' with id='balances', url='balances', text='Home', icon="money" %}
+{% call 'link' with id='accounts', url='accounts', text='Accounts', icon="book" %}
+{% call 'link' with id='transactions', url='transactions', text='Transactions', icon='tasks' %}
+{% call 'link' with id='transfer', url='transfer', text='Transfer', icon="arrows-h" %}
+{% call 'link' with id='send', url='send', text='Send', icon="share-square" %}
+{% call 'link' with id='bank', url="bank", text='Bank', icon="building" %}
+</ul>

@@ -1,0 +1,26 @@
+<moya xmlns="http://moyaproject.com">
+
+    <!-- The user's views -->
+    <mountpoint name="dashboard">
+        <url route="/*">
+            <forbidden if="not .user" />
+        </url>
+        <url route="/" methods="GET" view="#view.dashboard.balances" name="balances" />
+        <url route="/accounts/" methods="GET" view="#view.dashboard.accounts" name="accounts" />
+        <url route="/accounts/open/" methods="GET,POST" view="#view.dashboard.accounts.create" name="create_account" />
+        <url route="/accounts/view/{number}/" methods="GET" view="#view.dashboard.account.view" name="view_account" />
+        <url route="/accounts/edit/{number}/" methods="GET,POST" view="#view.dashboard.account.edit" name="edit_account" />
+        <url route="/accounts/make-default/{number}/" view="#view.dashboard.account.make_default" name="make_default" />
+        <url route="/transactions/" view="#view.dashboard.transactions" name="transactions" />
+        <url route="/transactions/view/{identity}/" view="#view.dashboard.transaction.view" name="view_transaction" />
+        <url route="/transfer/" methods="GET,POST" view="#view.dashboard.transfer" name="transfer" />
+        <url route="/transfer/confirm/{identity}/" methods="GET,POST" view="#view.dashboard.transfer.confirm" name="transfer_confirm"/>
+        <url route="/send/" methods="GET,POST" view="#view.dashboard.send" name="send"/>
+        <url route="/send/confirm/{identity}/" methods="GET,POST" view="#view.dashboard.send.confirm" name="send_confirm" />
+        <url route="/claim/{token}/" methods="GET,POST" view="#view.dashboard.claim" name="claim" />
+
+        <!-- <url route="/bank/" mount="#mountpoint.bank" /> -->
+    </mountpoint>
+
+
+</moya>

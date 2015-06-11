@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let">
+    <!-- define your widgets here -->
+
+    <tag name="complete" let="params">
+        <signature>
+            <attribute name="field" required="yes" type="text">Name attribute of form field</attribute>
+            <attribute name="results_template" required="no" type="text" default="">Override template to generate results</attribute>
+            <attribute name="show" type="integer" required="no" default="10">Number of results to show before scrolling</attribute>
+        </signature>
+
+        <include-js path="js/jsonrpc.js" from="moya.jsonrpc" />
+        <include-js path="js/moya-autocomplete.js" />
+        <include-css path="css/moya-autocomplete.css" />
+
+        <get-url name="jsonrpc" dst="rpc_url"/>
+        <let completer="_caller.element_ref" />
+        <str dst="id">autocomplete-${token:10}</str>
+        <dict dst="options" let:max_show="show" />
+        <js>
+            $("#${id}").moyaAutocomplete(${json:options});
+        </js>
+        <node template="widgets/autocomplete.html" withscope="yes"/>
+    </tag>
+
+</moya>

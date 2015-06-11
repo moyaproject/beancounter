@@ -1,0 +1,17 @@
+{#
+Basic information about a currency
+#}
+<dl class="dl-horizontal well well-sm">
+    <dt>Title</dt>
+    <dd>${currency.title}</dd>
+    <dt>Unit name (singluar)</dt>
+    <dd>${currency.unit_name_singular}</dd>
+    <dt>Unit name (plural)</dt>
+    <dd>${currency.unit_name_plural}</dd>
+    <dt>Minted</dt>
+    <dd class="text-info">${currency.minted|'amount'}</dd>
+    <dt>Circulation</dt>
+    <dd class="text-info">${currency.circulation|'amount'}</dd>
+    <dt>Description</dt>
+    <dd>{% markup currency.description as 'html' %}</dd>
+</dl>

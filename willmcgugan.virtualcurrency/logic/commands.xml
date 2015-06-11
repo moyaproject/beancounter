@@ -1,0 +1,68 @@
+<moya xmlns="http://moyaproject.com"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:auth="http://moyaproject.com/auth"
+      xmlns:email="http://moyaproject.com/email"
+      xmlns:currency="http://willmcgugan.com/currency">
+
+    <command libname="cmd.init" synopsis="initialize currency app">
+
+        <db:atomic>
+            <db:get model="#Currency" dst="currency"
+                let:slug=".app.settings.default_currency"/>
+
+            <db:create model="#Currency" dst="currency" if="not currency"
+                let:title="'Moya Bucks'"
+                let:description="'edit me'"
+                let:slug=".app.settings.default_currency"
+                let:unit_name_singular="'Buck'"
+                let:unit_name_plural="'Bucks'"
+                let:unit_cent_name_singular="'Cent'"
+                let:unit_cent_name_plural="'Cents'"
+                let:symbol="''"/>
+
+            <echo>Create ${currency}</echo>
+
+            <db:get model="moya.auth#User" let:id="1" dst="user" />
+            <currency:get-wallet dst="wallet" user="user"/>
+            <echo>Created ${wallet}</echo>
+
+            <currency:get-default-account user="user" currency="currency" dst="account"/>
+            <echo>Created ${account}</echo>
+
+            <echo>Added ${user} as banker</echo>
+            <append src="currency.bankers" value="user" />
+
+            <echo style="bold green">Currency was initialized</echo>
+        </db:atomic>
+        <catch exception="db.*" dst="error">
+            <echo style="bold red">Init failed</echo>
+            <echo obj="error" />
+        </catch>
+
+    </command>
+
+    <command libname="cmd.process-unclaimed">
+        <doc>Return currency send by email but not claimed</doc>
+        <log>hi</log>
+        <db:atomic>
+            <db:query model="#EmailReserve" filter="#EmailReserve.expire lt .now" dst="reserves" forupdate="yes"/>
+
+            <for src="reserves" dst="reserve">
+                <!-- <let reserve.account.reserved="reserve.account.reserved - reserver.amount" /> -->
+                <currency:return-reserve
+                    reserve="reserve"
+                    dst="returned"/>
+                <email:send
+                    email="#email.reserve.return"
+                    let:reserve="reserve"
+                    failsilently="yes"
+                    if="returned"/>
+                <log-debug>Returned ${reserve.amount|'amount'(currency=reserve.account.currency)} to ${reserve.sender} (${reserve.account})</log-debug>
+            </for>
+        </db:atomic>
+
+    </command>
+
+
+</moya>

@@ -1,0 +1,26 @@
+<moya xmlns="http://moyaproject.com"
+      xmlns:links="http://moyaproject.com/links"
+      xmlns:w="http://moyaproject.com/widgets"
+      xmlns:html="http://moyaproject.com/html"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:let="http://moyaproject.com/let">
+
+      <!--
+    <content libname="content.base">
+        <links:get dst="navlinks" />
+    </content>
+-->
+
+    <content libname="content.base" template="/base.html">
+        <links:get dst="navlinks" />
+    </content>
+
+    <content libname="content.front" extends="#content.base">
+        <include-css path="css/currency.css" from="currency" />
+        <section name="body">
+            <node template="/intro.html" let:form="form" />
+        </section>
+    </content>
+
+</moya>
+

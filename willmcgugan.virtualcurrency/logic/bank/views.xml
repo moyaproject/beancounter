@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:moya="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:currency="http://willmcgugan.com/currency"
+      xmlns:email="http://moyaproject.com/email"
+      xmlns:w="http://moyaproject.com/widgets"
+      xmlns:html="http://moyaproject.com/html"
+      xmlns:tables="http://moyaproject.com/tables">
+
+    <view libname="view.bank" content="#content.bank">
+        <db:query model="#Currency" filter="#Currency.bankers contains .user" orderby="title" dst="currencies" />
+    </view>
+
+    <view libname="view.bank.edit" content="#content.bank.currency.edit">
+        <db:get-required model="#Currency" let:slug=".url.currency" dst="currency" />
+        <forms:get form="#form.currency.edit" let:currency=".url.currency" src="currency" dst="form"/>
+        <forms:validate src="form">
+            <forms:apply src="form" dst="currency" />
+        </forms:validate>
+    </view>
+
+    <view libname="view.bank.currency" content="#content.bank.currency">
+        <db:get-required model="#Currency" let:slug=".url.currency" dst="currency" />
+        <get-enum enum="#enum.transaction.type" dst="types"/>
+        <db:query model="#Transaction"
+            let:type="int:types.mint"
+            let:currency="currency"
+            orderby="-sent"
+            dst="transactions"/>
+    </view>
+
+    <view libname="view.mint" content="#content.mint">
+        <db:get-required model="#Currency" let:slug=".url.currency" dst="currency" />
+        <forms:get form="#form.mint" dst="form"/>
+        <forms:validate src="form">
+            <db:create model="#Mint"
+                let:currency="currency"
+                let:user=".user"
+                let:expire=".now + 1h"
+                let:amount="form.data.amount"
+                let:notes="form.data.notes"
+                dst="mint"/>
+            <db:commit/>
+            <redirect name="mint_confirm" let:identity="mint.identity" />
+        </forms:validate>
+    </view>
+
+    <view libname="view.mint.confirm" content="#content.mint.confirm">
+        <db:get-required model="#Mint" dst="mint"
+            filter="#Mint.expire gt .now"
+            let:user=".user"
+            let:identity=".url.identity"/>
+        <let currency="mint.currency"/>
+        <forms:get form="#form.mint.confirm" dst="form" let:mint="mint"/>
+        <if-post>
+            <redirect name="mint" let:currency="mint.currency.slug"
+                if=".request.POST.action=='cancel'"/>
+            <if test=".request.POST.action=='confirm'">
+                <currency:mint
+                    currency="mint.currency"
+                    amount="mint.amount"
+                    notes="mint.notes"
+                    dst="transaction"/>
+                <db:delete src="mint"/>
+                <db:commit/>
+                <let success="yes"/>
+            </if>
+        </if-post>
+    </view>
+
+    <view libname="view.mint.send" content="#content.mint.send">
+        <db:get-required model="#Currency" let:slug=".url.currency" dst="currency" />
+        <currency:get-mint-account currency="currency" dst="account"/>
+        <forms:get form="#form.mint.send" let:account="account" dst="form"/>
+
+        <forms:validate src="form">
+            <call macro="#create_send" dst="send"
+                let:account="account"
+                let:form="form"
+                let:allow_self="yes"/>
+            <redirect if="form.ok"
+                name="mint_send_confirm"
+                let:currency="currency.slug"
+                let:identity="send.identity" />
+        </forms:validate>
+    </view>
+
+    <view libname="view.mint.send.confirm" content="#content.mint.send.confirm">
+        <db:get-required model="#Send" dst="send"
+            filter="#Send.expire gt .now"
+            let:user=".user"
+            let:identity=".url.identity" />
+        <let currency="send.account.currency"/>
+        <forms:get form="#form.send.confirm" let:send="send" dst="form"/>
+        <if-post>
+            <let action=".request.POST.action"/>
+            <if test="action=='cancel'">
+                <db:delete src="send"/>
+                <redirect name="mint_send" let:currency="currency.slug"/>
+            </if>
+            <if test="action=='send'">
+                <db:atomic>
+                    <defer to="#do_send"/>
+                    <let currency.circulation="currency.circulation + transaction.amount" if="transaction"/>
+                </db:atomic>
+            </if>
+        </if-post>
+    </view>
+
+</moya>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+    xmlns:moya="http://moyaproject.com"
+    xmlns:db="http://moyaproject.com/db"
+    xmlns:let="http://moyaproject.com/let"
+    xmlns:wysihtml5="http://moyaproject.com/wysihtml5"
+    xmlns:w="http://moyaproject.com/widgets"
+    xmlns:html="http://moyaproject.com/html"
+    xmlns:auto="http://moyaproject.com/auto">
+
+    <form libname="form.currency.edit" xmlns="http://moyaproject.com/forms"
+        legend="Edit Currency" style="horizontal" class="well">
+        <input name="title" label="Title" required="yes" src="title"/>
+        <field name="description" label="Description" src="description">
+            <wysihtml5:editor/>
+        </field>
+
+        <input name="unit_name_singular" label="Unit singular" maxlength="30" required="yes"
+            placeholder="e.g. dollar, credit, euro"/>
+        <input name="unit_name_plural" label="Unit plural" maxlength="30" required="yes"
+            placeholder="e.g. dollars, credits, euros"/>
+
+        <input name="unit_cent_name_singular" label="Cent singular" maxlength="30" required="yes"
+            placeholder="e.g. cent, penny"/>
+        <input name="unit_cent_name_plural" label="Cent plural" maxlength="30" required="yes"
+            placeholder="e.g. cents, pennies"/>
+
+        <submit-button text="Update" visual="success"/>
+
+    </form>
+
+
+    <form libname="form.mint" class="well" style="horizontal" legend="Mint new currency" xmlns="http://moyaproject.com/forms">
+
+        <input name="amount" label="Amount" required="yes" placeholder="0.00"
+            help="Including two decimal places, e.g. 12.34"/>
+
+        <text-area name="notes" label="Notes"
+            help="Your reason for minting new currency"/>
+        <submit-button text="Mint" name="action" clicked="send" visual="success"/>
+
+        <validate-field field="amount">
+            <fail if="not (value) matches /^\d+\.\d\d$/">
+                Invalid amount (don't forget to include two decimal places)
+            </fail>
+            <fail if="d:value lte 0">
+                Invalid amount
+            </fail>
+        </validate-field>
+
+    </form>
+
+
+    <form libname="form.mint.confirm" xmlns="http://moyaproject.com/forms">
+        <html:h3>Confirm Mint</html:h3>
+        <w:dialog>
+            <moya:markdown>
+                Are you sure you want to mint **${mint.amount|'amount'(currency=mint.currency)}**?
+
+                If you click *Mint*, the new currency will be created and made available immediately.
+
+                *This URL will expire in 1 hour.*
+            </moya:markdown>
+            <w:dialog-buttons>
+                <submit-button text="Mint" name="action" visual="success" clicked="confirm"/>
+                <submit-button text="Cancel" name="action" clicked="cancel"/>
+            </w:dialog-buttons>
+        </w:dialog>
+    </form>
+
+
+    <form libname="form.mint.send" xmlns="http://moyaproject.com/forms"
+        class="well" style="horizontal" legend="Send funds to a user / email address">
+
+        <hidden-input name="account" initial="account.number"/>
+        <input name="recipient" label="Recipient" placeholder="@username" required="yes"
+            help="(user account only)"/>
+        <auto:complete libname="input.recipient" field="recipient" xmlns="http://moyaproject.com"
+            results_template="recipient_results.html">
+            <let input="last:partition:[input, '@']" if="input ^= '@'" />
+            <return if="len:input gt 1">
+                <db:query model="moya.auth#User"
+                    filter="moya.auth#User.username contains input" maxresults="20"/>
+            </return>
+            <return if="len:input == 1">
+                <db:query model="moya.auth#User"
+                    filter="moya.auth#User.username ^= input" maxresults="20"/>
+            </return>
+        </auto:complete>
+
+        <input name="amount" label="Amount" required="yes" placeholder="0.00"
+            help="Including two decimal places, e.g. 12.34"/>
+
+        <input name="reference" label="Reference" required="no" />
+        <text-area name="notes" label="Message" help="Your message to the recipient"/>
+        <submit-button text="Send" name="action" clicked="send" visual="success"/>
+
+        <validate-field field="amount">
+            <fail if="not (value) matches /^\d+\.\d\d$/">
+                Invalid amount (don't forget to include two decimal places)
+            </fail>
+            <fail if="d:value lte 0">
+                Invalid amount
+            </fail>
+            <db:get model="#Account" let:number="values.account" dst="account"/>
+            <fail if="d:value gt account.spendable">
+                Insufficient funds, you may send a maximum of ${account.spendable|'amount'(currency=account.currency)}.
+            </fail>
+        </validate-field>
+
+    </form>
+
+</moya>

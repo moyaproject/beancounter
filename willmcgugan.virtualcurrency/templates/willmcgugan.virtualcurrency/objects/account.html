@@ -1,0 +1,16 @@
+{#
+Renders a currency#Account db object
+#}
+{% singleline %}
+{%- if link and self|'canmanage' %}<a href="{% url 'view_account' with number=self.number %}" data-toggle="tooltip" title="#${self.number} <br> ${self.balance|'amount'(currency=self.currency)}">{% endif -%}
+${self.name}
+<span class="text-muted">
+    {%- if detail -%}
+    <span class="hidden-sm">
+    ${self.balance|'amount'(currency=self.currency)}
+    {%- if self.reserved %}(${self.spendable|'amount'} spendable){% endif %}
+    </span>
+    {%- endif %}
+</span>
+{%- if self|'canmanage' %}</a>{% endif %}
+{%- endsingleline %}

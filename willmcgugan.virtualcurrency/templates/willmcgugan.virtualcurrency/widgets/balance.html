@@ -1,0 +1,10 @@
+{#
+Renders a formated balance in green, or red if the balance is <= 0
+
+Negative balanace shouldn't occur with the current system
+#}
+{%- if value lte 0 -%}
+<span class="text-danger currency">${value|'amount'}</span>
+{%- else -%}
+<span class="text-success currency">${value|'amount'}</span>
+{%- endif -%}

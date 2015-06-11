@@ -1,0 +1,11 @@
+{#
+Renders a #Currency db object
+#}
+<i class="fa fa-money"></i>&nbsp;
+{%- if banklink -%}
+<a href="{% url 'bank_currency' with currency=self.slug %}">
+{%- endif -%}
+${self.title}
+{%- if banklink -%}
+</a>
+{%- endif -%}

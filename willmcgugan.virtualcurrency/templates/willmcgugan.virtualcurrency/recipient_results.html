@@ -1,0 +1,6 @@
+{# used in recipient auto-complete #}
+{%- for index, result in enumerate:results %}
+<div class="moya-autocomplete-result selection selection-${index}" data-value="@${result.username}"{% if result.full_name %} title="${result.full_name}"{% endif %}>
+    <span class="glyphicon glyphicon-user"></span> @${result.username}
+</div>
+{%- endfor %}

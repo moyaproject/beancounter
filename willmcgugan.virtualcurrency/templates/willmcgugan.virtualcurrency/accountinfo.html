@@ -1,0 +1,21 @@
+{#
+Account information
+#}
+<div class="well well-sm currency-account-info">
+    <dl class="dl-horizontal">
+        <dt>Name</dt>
+        <dd>${account.name}</dd>
+        <dt>ID</dt>
+        <dd><tt>#${account.number}</tt></dd>
+        <dt>Created</dt>
+        <dd>${localize:account.created}</dd>
+        <dt>Balance</dt>
+        <dd {% attrib class=['currency', (account.balance ? 'text-success' : 'text-danger')] %}>${account.balance::',.2f'}</dd>
+        <dt>Spendable</dt>
+        <dd {% attrib class=['currency', (account.spendable ? 'text-info' : 'text-danger')] %}>${account.spendable::',.2f'}</dd>
+        {% if account.notes %}
+        <dt>Notes</dt>
+        <dd><div class="account-notes">${linebreaks:account.notes}</div></dd>
+        {% endif %}
+    </dl>
+</div>

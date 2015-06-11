@@ -1,0 +1,17 @@
+{#
+A list of accounts / balances on the Home page
+#}
+<div class="well well-sm">
+{% for currency, balance in balances %}
+    <div class="currency-balance clearfix">
+        <div class="alert alert-info pull-right">
+            <span class="balance">${balance|'amount'}</span>
+        </div>
+        <div class="pull-left currency-brief">
+            ${currency.title}<br>
+            <span class="text-muted">Minted</span> <span class="pull-right text-success">${currency.minted|'amount'}</span><br>
+            <span class="text-muted">Circulation</span> <span class="pull-right text-success">${currency.circulation|'amount'}</span>
+        </div>
+    </div>
+{% endfor %}
+</div>

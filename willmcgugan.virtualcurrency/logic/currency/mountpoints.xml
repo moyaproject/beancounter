@@ -1,0 +1,9 @@
+<moya xmlns="http://moyaproject.com">
+
+    <!-- Handles a given currency -->
+    <mountpoint name="currency">
+        <url route="/" methods="GET" view="#view.currency.intro" name="intro"/>
+        <url route="/edit/" methods="GET,POST" view="#view.currency.edit" name="edit_currency" />
+    </mountpoint>
+
+</moya>

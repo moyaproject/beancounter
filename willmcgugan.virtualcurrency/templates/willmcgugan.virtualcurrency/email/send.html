@@ -1,0 +1,33 @@
+{#
+Send when a user receives funds
+#}
+{% extends "base.html" %}
+
+{% block "title" %}You have received currency{% end %}
+
+{% block "content"%}
+
+{%- if email.name %}
+<p>Dear ${email.name},</p>
+{%- else %}
+<p>Dear Sir/Madam,</p>
+{%- end %}
+
+<p>You have been sent ${email.amount|"amount"(currency=email.account.currency)} by ${email.sender.display_name}.</p>
+
+{%- if email.notes %}
+<p>The sender attached the following message&hellip;</p>
+
+<blockquote>
+<pre>${email.notes}</pre>
+</blockquote>
+{%- end-if %}
+
+<p><a class="btn-primary" href="${claim_url}">Add currency to account</a></p>
+
+<p>
+--<br/>
+<a href="${.request.host_url}">$(.settings.project_title}</a>
+</p>
+
+{% end-block %}

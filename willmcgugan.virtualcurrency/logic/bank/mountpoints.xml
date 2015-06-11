@@ -1,0 +1,15 @@
+<moya xmlns="http://moyaproject.com">
+
+    <!-- Handles a given currency -->
+    <mountpoint name="bank" libname="mountpoint.bank">
+        <url route="/" view="#view.bank" name="bank" />
+        <url route="/manage/{currency}/" view="#view.bank.currency" name="bank_currency"/>
+        <url route="/edit/{currency}/" view="#view.bank.edit" name="bank_edit_currency"/>
+        <!-- <url route="/confirm-edit/{currency}/" view="debug#view.debug" name="bank_confirm_edit" /> -->
+        <url route="/mint/{currency}/" view="#view.mint" name="mint"/>
+        <url route="/mint-confirm/{identity}/" view="#view.mint.confirm" name="mint_confirm"/>
+        <url route="/mint/{currency}/send/" view="#view.mint.send" name="mint_send"/>
+        <url route="/mint/{currency}/send/confirm/{identity}/" view="#view.mint.send.confirm" name="mint_send_confirm"/>
+    </mountpoint>
+
+</moya>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:currency="http://willmcgugan.com/currency">
+
+    <form libname="form.get-money" xmlns="http://moyaproject.com/forms" style="basic" class="well">
+        <input label="Email" hidelabel="yes" placeholder="email address" name="email" required="yes" />
+        <submit-button text="Request Essentially Worthless Virtual Currency" visual="success" block="yes"/>
+        <validate-field field="email">
+            <fail if="not isemail:value">
+                This doesn't look like an email address
+            </fail>
+        </validate-field>
+    </form>
+
+
+    <view libname="view.front" content="#content.front">
+        <forms:get form="#form.get-money" dst="form"/>
+        <if-post>
+            <forms:validate src="form">
+                <db:get model="moya.auth#User" let:username="'will'" dst="will"/>
+                <db:get model="willmcgugan.virtualcurrency#Currency" let:id="1" dst="currency" />
+                <currency:get-default-account currency="currency" user="will" dst="account"/>
+                <currency:send-email
+                    email="form.data.email"
+                    name="None"
+                    sender="will"
+                    account="account"
+                    amount="d:'100.00'"
+                    reference="'Hacker News'"
+                    notes="data:'/promo.txt'"/>
+                <let expire_time=".now + 1d" />
+                <set-cookie name="ewvc3" value="${expire_time.isoformat}" maxage="1d" />
+            </forms:validate>
+        </if-post>
+    </view>
+
+</moya>

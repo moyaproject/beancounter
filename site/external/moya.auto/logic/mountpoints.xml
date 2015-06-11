@@ -1,0 +1,7 @@
+<moya xmlns="http://moyaproject.com">
+
+    <mountpoint name="main">
+        <url route="/jsonrpc/" view="#jsonrpc.interface" name="jsonrpc" />
+    </mountpoint>
+
+</moya>

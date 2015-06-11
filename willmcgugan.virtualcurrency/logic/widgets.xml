@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let">
+    <!-- define your widgets here -->
+
+    <widget name="balance" template="widgets/balance.html">
+        <doc>
+            Displays a formatted balance
+        </doc>
+        <signature>
+            <attribute name="value"/>
+        </signature>
+    </widget>
+
+</moya>

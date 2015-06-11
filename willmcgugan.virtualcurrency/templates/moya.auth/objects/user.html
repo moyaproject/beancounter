@@ -1,0 +1,11 @@
+{#
+    Renders a moya.auth#User object
+#}
+{%- def 'name' -%}
+{% if self.full_name %}${self.full_name}{% else %}@${self.display_name}{% endif %}
+{%- enddef -%}
+{%- if link and self != .user -%}
+<span class="glyphicon glyphicon-user"></span> <a data-toggle="tooltip" href="{% url 'send' from 'willmcgugan.virtualcurrency' query recipient='@' + self.username %}" title="@${self.username}">{% call 'name' %}</a>
+{%- else -%}
+<span class="glyphicon glyphicon-user"></span> <span data-toggle="tooltip" title="@${self.username}">{% call 'name' %}</span>
+{%- endif -%}

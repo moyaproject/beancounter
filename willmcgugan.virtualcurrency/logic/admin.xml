@@ -1,0 +1,88 @@
+<moya xmlns="http://moyaproject.com"
+        xmlns:moya="http://moyaproject.com"
+        xmlns:let="http://moyaproject.com/let"
+        xmlns:auth="http://moyaproject.com/auth"
+        xmlns:admin="http://moyaproject.com/admin"
+        xmlns:html="http://moyaproject.com/html"
+        xmlns:w="http://moyaproject.com/widgets">
+
+
+    <module xmlns="http://moyaproject.com/admin"
+        slug="currency" title="Currency" description="Manage Virtual Currency">
+        <link to="#admintable.currencies" title="Users"/>
+        <link to="#admintable.accounts" title="Accounts" />
+        <link to="#admintable.transactions" title="Transaction" />
+        <link to="#admintable.wallets" title="Wallets"/>
+        <link to="#admintable.sends" title="Sends" />
+        <link to="#admintable.emailedfunds" title="Emailed Funds" />
+        <link to="#admintable.mints" title="Mints"/>
+    </module>
+
+    <table xmlns="http://moyaproject.com/admin"
+        slug="currency" title="Currencies"
+        libname="admintable.currencies" model="#Currency" order="title" description="Currencies"
+        search="#Currency.title == q or #Currency.slug icontains q">
+        <column title="Title" link="yes" sort="title">${object.title}</column>
+        <column title="Unit Name" sort="unit_name">${object.unit_name_singular}</column>
+    </table>
+
+    <table xmlns="http://moyaproject.com/admin"
+        slug="account" title="Accounts"
+        libname="admintable.accounts" model="#Account" order="number" description="Accounts"
+        search="#Account.number == q or #Account.name == q">
+        <column title="Account Number" sort="number" link="yes">${object.number}</column>
+        <column title="Account Name" sort="name">${object.name}</column>
+        <column title="Balance" sort="balance"><html:span class="pull-right">${object.balance::'.2f'}</html:span></column>
+    </table>
+
+    <table xmlns="http://moyaproject.com/admin"
+        slug="transactions"
+        title="Transactions"
+        libname="admintable.transactions" model="#Transaction" order="sent" description="Account Transactions"
+        search="#Transaction.sender.number == q or #Transaction.receiver.number == q">
+        <column title="Transaction #" sort="identity" link="yes">${object.identity}</column>
+        <column title="Type" sort="type">${upper:.app.enum.transaction_type[object.type]}</column>
+        <column title="Sent Time" sort="sent">${localize:object.sent}</column>
+        <column title="Sender" sort="#Transaction.sender.username"><moya:render src="object.sender"/></column>
+        <column title="Source Account" sort="#Transaction.source.number"><moya:render src="object.source"/></column>
+        <column title="Destination Account" sort="#Transaction.destination.number"><moya:render src="object.destination"/></column>
+        <column title="Amount" sort="amount"><html:span class="pull-right">${object.amount::'.2f'}</html:span></column>
+    </table>
+
+    <table xmlns="http://moyaproject.com/admin"
+        slug="wallets"
+        title="Wallets"
+        libname="admintable.wallets" model="#Wallet" description="Wallets">
+        <column title="Wallet" link="yes">${object}</column>
+        <column title="User"><moya:render src="object.user"/></column>
+    </table>
+
+    <table xmlns="http://moyaproject.com/admin"
+        slug="sends"
+        title="Sends"
+        libname="admintable.sends" model="#Send" description="Sends">
+        <column title="Identity" sort="identity" link="yes">${object.identity}</column>
+        <column title="User" sort="user">${object.user}</column>
+    </table>
+
+    <table xmlns="http://moyaproject.com/admin"
+        slug="email-reserve"
+        title="Emailed Funds"
+        libname="admintable.emailedfunds" model="#EmailReserve" description="Currency sent by email">
+        <column title="Token" sort="token" link="yes">${object.token}</column>
+        <column title="Sender" sort="sender"><moya:render src="object.sender"/></column>
+        <column title="Amount" sort="amount">${object.amount::',.2f'}</column>
+        <column title="Email" sort="email">${object.email}</column>
+    </table>
+
+    <table xmlns="http://moyaproject.com/admin"
+        slug="mints"
+        title="Pending Mints"
+        libname="admintable.mints" model="#Mint" description="Currency to be created">
+        <column title="Identity" sort="identity" link="yes">${object.identity}</column>
+        <column title="User" sort="user"><moya:render src="object.user"/></column>
+        <column title="Amount" sort="amount">${object.amount|'amount'}</column>
+    </table>
+
+
+</moya>

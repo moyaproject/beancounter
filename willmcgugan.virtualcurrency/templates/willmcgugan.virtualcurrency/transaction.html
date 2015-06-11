@@ -1,0 +1,40 @@
+{# Transaction details #}
+<dl class="dl-horizontal well">
+    <dt>Sender</dt>
+    <dd>{% render transaction.sender with link=yes %}</dd>
+    <dt>Recipient</dt>
+    <dd>{% render transaction.recipient with link=yes %}</dd>
+    <dt>Reference</dt>
+    {% if transaction.reference %}
+    <dd>${transaction.reference}</dd>
+    {% else %}
+    <dd><em>no reference</em></dd>
+    {% endif %}
+    <dt>Type</dt>
+    <dd>${upper:str:self.app.enum.transaction_type[transaction.type]}</dd>
+    <dt>Sent</dt>
+    <dd>${localize:transaction.sent.local}</dd>
+    <dt>ID</dt>
+    <dd><tt>${transaction.identity}</tt></dd>
+    {%- if transaction.source|'canmanage' %}
+    <dt>Source</dt>
+    <dd>{% render transaction.source with link='yes' %}</dd>
+    {%- endif %}
+    {%- if transaction.destination|'canmanage' %}
+    <dt>Account</dt>
+    <dd>{% render transaction.destination with link='yes' %}</dd>
+    {%- endif %}
+    <dt>Amount</dt>
+    <dd class="currency text-info">${transaction.amount|'amount'}</dd>
+</dl>
+
+{%- if transaction.notes %}
+
+{%- if transaction.sender == .user %}
+<h4>Message to ${transaction.recipient.display_name}</h4>
+{%- else %}
+<h4>Message from ${transaction.sender.display_name}</h4>
+{%- endif %}
+<div class="transaction-view-notes well">${transaction.notes}</div>
+
+{%- endif %}

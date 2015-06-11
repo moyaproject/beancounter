@@ -1,0 +1,14 @@
+{% extends "/base.html" %}
+
+
+{% block "body" %}
+{% render sections.body %}
+{% endblock %}
+
+{% block "js" append %}
+<script type="text/javascript">
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip({html:true});
+});
+</script>
+{% endblock %}

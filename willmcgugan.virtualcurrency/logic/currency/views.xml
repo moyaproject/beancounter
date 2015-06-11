@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:currency="http://willmcgugan.com/currency">
+
+    <view libname="view.currency.intro" content="#content.currency.intro">
+        <db:get-required model="#Currency" let:slug=".url.currency" dst="currency"/>
+    </view>
+
+    <view libname="view.currency.edit" content="#content.currency.edit">
+        <db:get-required model="#Currency" let:slug=".url.currency" dst="currency"/>
+        <forms:get form="#form.currency.edit" dst="form" src="currency" />
+        <forms:validate src="form">
+            <forms:apply src="form" dst="currency" />
+            <let success="yes" />
+        </forms:validate>
+    </view>
+
+</moya>

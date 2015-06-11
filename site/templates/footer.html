@@ -1,0 +1,16 @@
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted">
+
+            <span class="pull-right">
+                built with <a href="https://www.moyaproject.com">Moya</a>
+            </span>
+
+            Bean Counter &copy; 2015 Will McGugan &nbsp;
+            <a href="{% url 'showpage' from 'moya.pages' with pagename='about' %}">About</a> |
+            <a href="{% url 'feedback' from 'moya.feedback' %}">Feedback</a> |
+            <a href="{% url 'showpage' from 'moya.pages' with pagename='contact' %}">Contact</a> |
+            <a href="{% url 'list' from 'moya.blog' %}">Blog</a>
+        </p>
+    </div>
+</footer>

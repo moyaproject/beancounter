@@ -1,0 +1,28 @@
+{#
+Sent when a user sends funds to another user
+#}
+{% extends "base.html" %}
+
+{% block "title" %}You have been sent currency{% if transaction.reference %} (ref: ${transaction.reference}){% endif %}{% endblock %}
+
+{% block "content" %}
+<p>Dear ${transaction.recipient.display_name},</p>
+
+<p>You have been sent <strong>${transaction.amount|'amount'(currency=transaction.source.currency)}</strong> by ${transaction.sender.display_name}.</p>
+
+{%- if transaction.notes %}
+<p>${transaction.sender.display_name} attached the following message&hellip;</p>
+
+<blockquote>
+<pre>${transaction.notes}</pre>
+</blockquote>
+{%- endif %}
+
+<p><a class="btn-primary" href="${transaction_url}">View transaction details</a></p>
+
+<p>
+--<br/>
+<a href="${.request.host_url}">${.settings.project_title}</a>
+</p>
+
+{% end-block %}

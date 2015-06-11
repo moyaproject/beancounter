@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:moya="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:currency="http://willmcgugan.com/currency"
+      xmlns:email="http://moyaproject.com/email"
+      xmlns:w="http://moyaproject.com/widgets"
+      xmlns:html="http://moyaproject.com/html"
+      xmlns:tables="http://moyaproject.com/tables">
+
+    <content extends="#content.dashboard" libname="content.bank">
+        <title>Bank</title>
+        <let-str page="bank"/>
+        <json dst="columns">
+        {
+            "name": "#Currency.title",
+            "minted": "#Currency.minted",
+            "circulation": "#Currency.circulation"
+        }
+        </json>
+        <db:sort-map src="currencies" columns="columns"/>
+        <section name="content">
+
+            <html:h2>
+                Bank
+                <html:small>manage currencies</html:small>
+            </html:h2>
+
+            <if test="not currencies">
+                <w:info>
+                    <markdown>
+                        **You are not a *banker* of any currencies!**
+
+                        A banker is the admin of a currency, and is responsible for minting new currency units.
+                    </markdown>
+                </w:info>
+            </if>
+            <else>
+                <w:info>
+                    <markdown>Select one of the following currencies to manage it</markdown>
+                </w:info>
+
+                <w:paginate auto="no" src="currencies">
+                    <table class="table" xmlns="http://moyaproject.com/tables">
+                        <columns>
+                            <sort-header name="title">Title</sort-header>
+                            <sort-header name="total" align="right">Minted</sort-header>
+                            <sort-header name="circulation" align="right">Circulation</sort-header>
+                        </columns>
+                        <rows src="pagination.objects" dst="currency">
+                            <cell>
+                                <w:link name="bank_currency" let:currency="currency.slug">
+                                    ${currency.title}
+                                </w:link>
+                            </cell>
+                            <cell>
+                                <currency:balance value="currency.minted"/>
+                            </cell>
+                            <cell>
+                                <currency:balance value="currency.circulation"/>
+                            </cell>
+                        </rows>
+                    </table>
+                </w:paginate>
+            </else>
+
+        </section>
+    </content>
+
+    <content extends="#content.dashboard" libname="content.bank.currency">
+        <title>${currency.name}</title>
+        <let-str page="bank"/>
+
+        <json dst="columns">
+        {
+            "time":"#Transaction.sent",
+            "notes": "#Transaction.notes",
+            "amount":"#Transaction.amount",
+            "total":"#Transaction.minted"
+        }
+        </json>
+        <db:sort-map src="transactions" columns="columns"/>
+
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="bank">Bank</w:link>
+                <w:link name="bank_currency" let:currency="currency.slug">${currency.title}</w:link>
+            </w:breadcrumbs>
+            <html:h2>
+                Bank of ${currency.title}
+                <w:button-link name="bank_edit_currency" let:currency="currency.slug" icon="pencil" size="sm">
+                    Edit
+                </w:button-link>
+                <w:button-link name="mint_send" let:currency="currency.slug" visual="success" icon="gift" size="sm">
+                    Send
+                </w:button-link>
+            </html:h2>
+            <node template="bank/currencyinfo.html" let:currency="currency" />
+
+            <html:h3>
+                Money Supply
+                <w:button-link name="mint" let:currency="currency.slug" icon="piggy-bank" size="sm" visual="success">
+                    Mint
+                </w:button-link>
+            </html:h3>
+            <get-enum enum="#enum.transaction.type" dst="types"/>
+            <w:paginate pagesize="20" auto="no" src="transactions" fragment="transactions">
+                <table class="transactions-table table" xmlns="http://moyaproject.com/tables">
+                    <columns>
+                        <sort-header name="time">Time</sort-header>
+                        <sort-header name="notes">Notes</sort-header>
+                        <sort-header name="amount" align="right">Amount</sort-header>
+                        <sort-header name="total" align="right">Total</sort-header>
+                    </columns>
+                    <rows src="pagination.objects" dst="transaction">
+                        <cell>
+                            <html:span class="sent-time">${transaction.sent.local % 'medium'}</html:span>
+                        </cell>
+                        <cell>
+                            <moya:render src="transaction.notes" target="html.linebreaks" />
+                        </cell>
+                        <cell class="currency text-info">
+                            ${transaction.amount::',.2f'}
+                        </cell>
+                        <cell class="currency text-info" hide="not transaction.minted">
+                            ${transaction.minted::',.2f'}
+                        </cell>
+                    </rows>
+                </table>
+            </w:paginate>
+
+        </section>
+    </content>
+
+    <content extends="#content.dashboard" libname="content.bank.currency.edit">
+        <title>Edit ${Currency.title}</title>
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="bank">Bank</w:link>
+                <w:link name="bank_currency" let:currency="currency.slug">${currency.title}</w:link>
+                <w:link name="bank_edit_currency" let:currency="currency.slug">Edit</w:link>
+            </w:breadcrumbs>
+            <if test="form.ok">
+                <w:success>
+                    Currency was updated successfully
+                </w:success>
+                <w:button-link name="bank_currency" let:currency="currency.slug">
+                    Return to currency
+                </w:button-link>
+            </if>
+            <else>
+                <render src="form" />
+            </else>
+        </section>
+    </content>
+
+    <content extends="#content.dashboard" libname="content.mint">
+        <title>${currency.title} Mint</title>
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="bank">Bank</w:link>
+                <w:link name="bank_currency" let:currency="currency.slug">${currency.title}</w:link>
+                <w:link name="mint" let:currency="currency.slug">Mint</w:link>
+            </w:breadcrumbs>
+            <w:info>
+                <markdown>
+                    *Minting* is the process of creating new currency.
+
+                    Once currency has been minted, it may be transfered to other users.
+                </markdown>
+            </w:info>
+            <render src="form"/>
+        </section>
+    </content>
+
+    <content extends="#content.dashboard" libname="content.mint.confirm">
+        <title>Confirm Mint</title>
+        <section name="content">
+            <if test="success">
+                <w:success>
+                    <markdown>
+                        Currency was successfully minted.
+                    </markdown>
+                </w:success>
+                <w:button-link name="bank_currency" let:currency="currency.slug">
+                    Back to Bank
+                </w:button-link>
+            </if>
+            <render src="form" if="not success"/>
+        </section>
+    </content>
+
+
+    <content extends="#content.dashboard" libname="content.mint.send">
+        <title>Send ${Currency.unit_name_singular}</title>
+        <section name="content">
+            <w:breadcrumbs>
+                <w:link name="bank">Bank</w:link>
+                <w:link name="bank_currency" let:currency="currency.slug">${currency.title}</w:link>
+                <w:link name="mint_send" let:currency="currency.slug">Send</w:link>
+            </w:breadcrumbs>
+            <w:info>
+                <markdown>
+                    Use this form to send currency to a user (including yourself).
+
+                    When currency is sent to a user, it is considered to be in *circulation*
+                </markdown>
+            </w:info>
+            <render src="form" />
+        </section>
+    </content>
+
+    <content libname="content.mint.send.confirm" extends="#content.dashboard">
+        <title>Confirm</title>
+        <section name="content">
+            <if test="insufficient">
+                <w:error>
+                    <markdown>
+                        **You have insufficient funds to send!**
+
+                        You may send a maximum of ${send.account.balance|'amount'(currency=send.account.currency)}
+                    </markdown>
+                </w:error>
+            </if>
+            <elif test="fail">
+                <w:error>
+                    <markdown>
+                        **Unable to send email.**
+
+                        If the problem persists, please contact admin.
+                    </markdown>
+                </w:error>
+                <render src="form"/>
+            </elif>
+            <elif test="email">
+                <w:success>
+                    <markdown>
+                        You have successfully sent funds to **${email.email}**
+
+                        The recipient must click the link in the email to accept the funds.
+                    </markdown>
+                </w:success>
+                <w:button-link name="bank_currency" let:currency="currency.slug">
+                    Back to Currency
+                </w:button-link>
+                <w:button-link name="mint_send" let:currency="currency.slug">
+                    Send more
+                </w:button-link>
+            </elif>
+            <elif test="transaction">
+                <w:success>
+                    <markdown>
+                        You have successfully sent funds.
+
+                        Transaction reference: **${transaction.identity}**
+                    </markdown>
+                </w:success>
+                <w:button-link name="bank_currency" let:currency="currency.slug">
+                    Back to Currency
+                </w:button-link>
+                <w:button-link name="mint_send" let:currency="currency.slug">
+                    Send more
+                </w:button-link>
+            </elif>
+            <else>
+                <render src="form" />
+            </else>
+        </section>
+    </content>
+
+</moya>

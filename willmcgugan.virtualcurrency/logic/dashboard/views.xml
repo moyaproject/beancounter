@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<moya xmlns="http://moyaproject.com"
+      xmlns:let="http://moyaproject.com/let"
+      xmlns:db="http://moyaproject.com/db"
+      xmlns:forms="http://moyaproject.com/forms"
+      xmlns:currency="http://willmcgugan.com/currency"
+      xmlns:email="http://moyaproject.com/email">
+
+
+    <view libname="view.front" content="#content.front">
+    </view>
+
+
+    <view libname="view.dashboard.balances" content="#content.dashboard.balances">
+        <currency:get-wallet dst="wallet"/>
+        <db:query columns="#Currency,sum:#Account.balance" dst="balances"
+            filter="#Account.id in wallet.accounts" orderby="#Account.currency.title"
+            groupby="#Account.currency" collect="list"/>
+
+    </view>
+
+    <view libname="view.dashboard.accounts" content="#content.dashboard.accounts">
+        <currency:get-wallet dst="wallet"/>
+        <db:query model="#Account" filter="#Account.id in wallet.accounts" dst="accounts" orderby="name" />
+    </view>
+
+    <view libname="view.dashboard.accounts.create" content="#content.dashboard.accounts.create">
+        <currency:get-wallet dst="wallet"/>
+        <db:get-required model="#Currency" let:slug=".app.settings.default_currency" dst="currency" />
+        <forms:get form="#form.account.create" let:currency="currency" dst="form" />
+
+        <if-post>
+            <forms:validate src="form">
+                <db:transaction>
+                    <db:create model="#Account" let:currency="currency" dst="account"/>
+                    <forms:apply src="form" fields="name,notes" dst="account" />
+                    <append src="wallet.accounts" value="account"/>
+                </db:transaction>
+                <catch exception="db.*">
+                    <let fail="yes"/>
+                    <done/>
+                </catch>
+                <db:transaction>
+                    <if test="form.data.default">
+                        <db:query src="wallet.accounts" let:currency="account.currency" dst="same_currency_accounts"/>
+                        <db:update src="same_currency_accounts" let:default="no" />
+                        <let account.default="yes" />
+                    </if>
+                </db:transaction>
+                <let success="yes" />
+            </forms:validate>
+        </if-post>
+    </view>
+
+    <view libname="view.dashboard.account.edit" content="#content.dashboard.account.edit">
+        <currency:get-wallet dst="wallet" />
+        <db:get-required model="#Account" dst="account"
+            let:number=".url.number" filter="#Account.id in wallet.accounts"/>
+        <forms:get form="#form.account.edit" src="account" dst="form"
+            let:account="account"/>
+        <forms:validate src="form">
+            <forms:apply src="form" dst="account" />
+            <let success="yes" />
+        </forms:validate>
+    </view>
+
+    <view libname="view.dashboard.account.view" content="#content.dashboard.account.view">
+        <currency:get-wallet dst="wallet" />
+        <db:query src="wallet.accounts" orderby="name" dst="accounts" />
+        <db:get-required model="#Account" dst="account"
+            let:number=".url.number" filter="#Account.id in wallet.accounts"/>
+
+        <let from_date=".now - 30d"/>
+        <db:query model="#Transaction" dst="transactions"
+            orderby="-sent" distinct="yes"
+            filter="(#Transaction.source == account or #Transaction.destination == account) and #Transaction.sent gt from_date" />
+    </view>
+
+    <view libname="view.dashboard.transactions" content="#content.dashboard.transactions">
+        <currency:get-wallet dst="wallet" />
+        <let accounts="wallet.accounts" />
+
+        <db:query model="#Transaction" dst="transactions"
+            orderby="-sent"
+            distinct="no"
+            filter="#Transaction.source.id in accounts or #Transaction.destination.id in accounts"/>
+
+        <let filter_q=".request.GET.q"/>
+        <switch on="filter_q.0" if="filter_q">
+            <case>#</case>
+            <let q="dropchar:filter_q"/>
+            <db:query src="transactions" filter="#Transaction.identity==q" dst="transactions"/>
+
+            <case>@</case>
+            <let q="dropchar:filter_q"/>
+            <db:query src="transactions" filter="#Transaction.sender.username==q or #Transaction.recipient.username==q" dst="transactions"/>
+
+            <default-case/>
+            <let q="filter_q" />
+            <db:query src="transactions" filter="#Transaction.reference icontains q" dst="transactions" />
+        </switch>
+
+        <let filter_account=".request.GET.account" />
+        <db:query src="transactions" dst="transactions" if="filter_account"
+            filter="#Transaction.destination.number == filter_account or #Transaction.source.number == filter_account"/>
+
+        <let filter_month=".request.GET.month" filter_date="date:.request.GET.month"/>
+        <db:query src="transactions" dst="transactions"
+            filter="#Transaction.sent gte filter_date and #Transaction.sent lt filter_date.next_month"
+            if="filter_month"/>
+
+        <get-enum enum="#enum.transaction.type" dst="types"/>
+        <let filter_type=".request.GET.type or 'all'"/>
+        <switch on="filter_type">
+            <case>pay</case>
+            <db:query src="transactions" dst="transactions" filter="#Transaction.type==types.pay"/>
+            <case>transfer</case>
+            <db:query src="transactions" dst="transactions" filter="#Transaction.type==types.transfer"/>
+        </switch>
+
+    </view>
+
+    <view libname="view.dashboard.transfer" content="#content.dashboard.transfer">
+        <currency:get-wallet dst="wallet"/>
+        <db:query src="wallet.accounts" orderby="name" dst="accounts"/>
+
+        <db:get model="#Account" src="wallet.accounts" let:default="yes" dst="default_account" />
+        <forms:get form="#form.transfer" dst="form"
+            let:accounts="accounts" let:default_account="default_account"/>
+
+        <if-post>
+            <forms:validate src="form">
+                <db:transaction>
+                    <db:get model="#Account" let:number="form.data.account1" dst="account1"/>
+                    <db:get model="#Account" let:number="form.data.account2" dst="account2"/>
+                    <forbidden if="account1 not in wallet.accounts" />
+                    <forbidden if="account2 not in wallet.accounts" />
+                    <db:create model="#Transfer" dst="transfer"
+                        let:expire=".now + 1h"
+                        let:user=".user"
+                        let:account1="account1"
+                        let:account2="account2"
+                        let:notes="form.data.notes"
+                        let:amount="d:form.data.amount"/>
+                </db:transaction>
+                <redirect name="transfer_confirm"
+                    let:identity="transfer.identity"
+                    query="back=.request.GET.back or ''"/>
+            </forms:validate>
+        </if-post>
+    </view>
+
+    <macro libname="create_send">
+        <doc>
+            Prepares a #Send object
+        </doc>
+        <signature>
+            <argument name="account"/>
+            <argument name="form"/>
+            <argument name="allow_self" default="no"/>
+        </signature>
+
+        <let recipient="form.data.recipient" />
+
+        <db:create model="#Send" dst="send"
+            let:expire=".now + 1h"
+            let:user=".user"
+            let:account="account"
+            let:sent_to="recipient"
+            let:reference="form.data.reference"
+            let:notes="form.data.notes"
+            let:amount="d:form.data.amount" />
+
+        <if test="'@' in recipient">
+            <db:get model="moya.auth#User" let:email="recipient" dst="user" />
+            <if test="not user">
+                <db:get model="moya.logins#ConnectedAccount"
+                    let:provider_email="recipient"
+                    dst="connected_account"/>
+                <let user="connection_account.user"
+                    if="connected_account"/>
+            </if>
+            <let recipient="user.username" if="user" />
+        </if>
+        <if test="'@' in recipient and not recipient ^= '@'">
+            <let send.email="recipient"/>
+        </if>
+        <elif test="recipient ^= '#'">
+            <let account_number="dropchar:recipient" />
+            <db:get model="#Account"
+                dst="recipient_account"
+                let:number="account_number"
+                let:currency="account.currency" />
+            <if test="not recipient_account">
+                <forms:error src="form">Unknown account number</forms:error>
+                <done/>
+            </if>
+            <if test="recipient_account|'canmanage'">
+                <forms:error src="form">Can't send to an account you own! See 'Transfer'.</forms:error>
+            </if>
+            <let send.recipient_account="recipient_account"/>
+        </elif>
+        <else>
+            <let recipient="dropchar:recipient" if="recipient ^= '@'"/>
+            <let send.sent_to="recipient"/>
+            <db:get model="moya.auth#User" let:username="recipient" dst="recipient_user"/>
+            <if test="recipient_user == .user and not allow_self">
+                <forms:error src="form" if="recipient_user == .user">Can't send to yourself!</forms:error>
+                <done/>
+            </if>
+            <if test="not recipient_user">
+                <forms:error src="form">No user named '${recipient}'</forms:error>
+                <done/>
+            </if>
+            <let send.recipient="recipient_user" />
+        </else>
+        <db:commit/>
+        <return value="send"/>
+    </macro>
+
+    <view libname="view.dashboard.send" content="#content.dashboard.send">
+        <currency:get-wallet dst="wallet"/>
+        <db:query src="wallet.accounts" orderby="name" dst="accounts"/>
+
+        <db:get model="#Account" src="accounts" let:default="yes" dst="default_account" />
+        <forms:get form="#form.send" dst="form"
+            src=".request.GET"
+            let:accounts="accounts"
+            let:default_account="default_account"/>
+
+        <if-post>
+            <forms:validate src="form">
+                <db:get model="#Account" let:number="form.data.account" dst="account"/>
+                <forbidden if="account not in wallet.accounts" />
+                <call macro="#create_send" dst="send"
+                    let:account="account"
+                    let:form="form"/>
+                <redirect if="form.ok"
+                    name="send_confirm"
+                    query="back=.request.GET.back or ''"
+                    let:identity="send.identity" />
+            </forms:validate>
+        </if-post>
+    </view>
+
+    <view libname="view.dashboard.transfer.confirm" content="#content.dashboard.transfer.confirm">
+        <db:get-required model="#Transfer" let:user=".user" let:identity=".url.identity" dst="transfer"/>
+        <forms:get form="#form.transfer.confirm" action=".?back=${.request.GET.back or ''}" let:transfer="transfer" dst="form"/>
+        <if-post>
+            <let action=".request.POST.action"/>
+            <if test="action=='cancel'">
+                <db:delete src="transfer" />
+                <redirect-to path="${.request.GET.back}" if=".request.GET.back" />
+                <redirect name="transfer" />
+            </if>
+            <if test="action=='confirm'">
+                <try>
+                    <currency:transfer dst="transaction"
+                        user="transfer.user"
+                        account1="transfer.account1"
+                        account2="transfer.account2"
+                        amount="transfer.amount"
+                        notes="transfer.notes"/>
+                    <db:delete src="transfer" />
+                    <let confirmed="yes"/>
+                </try>
+                <catch exception="willmcgugan.currency.insufficient-funds">
+                    <let insufficient="yes"/>
+                </catch>
+            </if>
+        </if-post>
+    </view>
+
+    <macro libname="do_send">
+        <try>
+            <if test="send.recipient">
+                <currency:send-user
+                    dst="transaction"
+                    user="send.user"
+                    account="send.account"
+                    recipient="send.recipient"
+                    amount="send.amount"
+                    reference="send.reference"
+                    notes="send.notes" />
+            </if>
+            <elif test="send.email">
+                <currency:send-email
+                    dst="email"
+                    email="send.email"
+                    name="strip:.request.POST.name or None"
+                    sender="send.user"
+                    account="send.account"
+                    amount="send.amount"
+                    reference="send.reference"
+                    notes="send.notes" />
+            </elif>
+            <elif test="send.recipient_account">
+                <currency:send-account
+                    dst="transaction"
+                    user="send.user"
+                    account="send.account"
+                    recipient_account="send.recipient_account"
+                    amount="send.amount"
+                    reference="send.reference"
+                    notes="send.notes" />
+            </elif>
+            <else>
+                <throw exception="willmcgugan.currency.send-fail"
+                    msg="don't know how to send ${send}"/>
+            </else>.
+            <db:delete src="send"/>
+        </try>
+        <catch exception="willmcgugan.currency.insufficient-funds">
+            <let insufficient="yes"/>
+        </catch>
+        <catch exception="*">
+            <let fail="yes"/>
+        </catch>
+    </macro>
+
+    <view libname="view.dashboard.send.confirm" content="#content.dashboard.send.confirm">
+        <db:get-required model="#Send" dst="send"
+            filter="#Send.expire gt .now"
+            let:user=".user"
+            let:identity=".url.identity" />
+        <forms:get form="#form.send.confirm" action=".?back=${.request.GET.back or ''}" let:send="send" dst="form"/>
+        <if-post>
+            <let action=".request.POST.action"/>
+            <if test="action=='cancel'">
+                <db:delete src="send"/>
+                <redirect-to path="${.request.GET.back}" if=".request.GET.back"/>
+                <redirect name="send" />
+            </if>
+            <if test="action=='send'">
+                <defer to="#do_send"/>
+            </if>
+        </if-post>
+    </view>
+
+    <view libname="view.dashboard.claim" content="#content.dashboard.claim">
+        <currency:get-wallet dst="wallet"/>
+        <db:get model="#EmailReserve" let:token=".url.token" forupdate="yes" dst="claim" />
+        <let claimed="not claim"/>
+        <done if="claimed"/>
+
+        <db:query src="wallet.accounts" let:currency="claim.account.currency" dst="accounts"/>
+        <db:get model="#Account" src="accounts" let:default="yes" dst="default_account" />
+
+        <forms:get form="#form.claim" dst="form"
+            let:accounts="accounts"
+            let:default_account="default_account"/>
+
+        <if-post>
+            <forms:validate src="form">
+                <currency:claim dst="transaction"
+                    claim="claim"
+                    accountno="form.data.account or None"/>
+                <let success="yes"/>
+            </forms:validate>
+        </if-post>
+    </view>
+
+    <view libname="view.dashboard.account.make_default" content="#content.dashboard.make_active">
+        <currency:get-wallet dst="wallet"/>
+        <db:get-required model="#Account" dst="account"
+            src="wallet.accounts"
+            let:number=".url.number"/>
+        <forms:get form="#form.make_default" let:account="account" dst="form" />
+        <forms:validate src="form">
+            <if test="form.data.action=='make_default'">
+                <db:atomic>
+                    <db:update src="wallet.accounts" let:default="no" />
+                    <let account.default="yes"/>
+                </db:atomic>
+            </if>
+            <redirect name="view_account" let:number="account.number" />
+        </forms:validate>
+    </view>
+
+    <view libname="view.dashboard.transaction.view" content="#content.dashboard.transaction.view">
+        <currency:get-wallet dst="wallet"/>
+        <db:get-required model="#Transaction"
+            let:identity=".url.identity"
+            filter="#Transaction.source.id in wallet.accounts or #Transaction.destination.id in wallet.accounts"
+            dst="transaction" />
+
+    </view>
+
+</moya>

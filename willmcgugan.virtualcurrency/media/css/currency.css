@@ -1,0 +1,196 @@
+
+td.currency
+{
+    /*text-align:right;*/
+    font-family:monospace;
+}
+
+.tooltip-inner
+{
+    font-size:1.4em;
+}
+
+.currency
+{
+    font-family:monospace;
+}
+
+.currency-account-info dl
+{
+    margin-bottom:0px;
+}
+
+
+.currency-transactions
+{
+    margin-left:0px;
+    padding-left:0px;
+    width:100%;
+    background-color:transparent;
+}
+
+.transaction
+{
+
+}
+
+.account-default
+{
+    font-weight:bold;
+}
+
+.transaction-date
+{
+    width:120px;
+    display:inline-block;
+    text-align:center;
+    padding-right:1em;
+    padding-left:.5em;
+}
+
+.transaction-reference
+{
+    opacity:0.6;
+    font-size:.9em;
+}
+
+td.transaction-notes
+{
+    opacity:0.6;
+    width:60%;
+    padding-left:1em;
+    margin-top:.5em;
+    padding-right:1em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+
+td.transaction-notes p
+{
+    height:3em;
+    overflow:hidden;
+    padding:0px;
+    margin:0px;
+}
+
+.account-notes
+{
+    font-style:italic;
+}
+
+
+.transaction-view-notes
+{
+    color:#bbb;
+    white-space:pre;
+}
+
+.transaction-date .date
+{
+    float:left;
+    font-size:2.67em;
+    text-align:right;
+}
+
+
+.transaction-date .month
+{
+    font-variant:small-caps;
+    margin-top:.5em;
+}
+
+.transaction-date .year
+{
+    clear:right;
+    font-size:.9em;
+}
+
+
+.transaction-sender
+{
+
+}
+
+.transaction-sender
+{
+    white-space:nowrap;
+}
+
+li.transaction
+{
+    /*background-color:#f5f5f5;*/
+    outline:1px solid white;
+}
+
+li.transaction:hover
+{
+    border-bottom:1px solid #fff;
+}
+
+.transaction .amount
+{
+    font-size:2.5em;
+    text-align:right;
+    padding-right:8px;
+    vertical-align:top;
+}
+
+.currency-transactions
+{
+    margin-bottom:0px;
+}
+
+.currency-transactions .transaction:hover
+{
+    cursor:pointer;
+    background-color:#111;
+}
+
+.currency-balance .alert
+{
+    width:50%;
+    display:inline-block;
+    margin-bottom:0px;
+    text-align:center;
+}
+
+.currency-balance .balance
+{
+    font-size:1.7em;
+}
+
+.currency-balance .currency-brief
+{
+    margin-top:0.2em;
+    margin-left:1em;
+    width:12em;
+}
+
+table.currency-transactions
+{
+    margin-bottom:20px;
+}
+
+table.transactions-table .sent-time
+{
+    white-space:nowrap;
+}
+
+.pagination
+{
+    margin-top:0px;
+}
+
+.well .form-group:last-child
+{
+    margin-bottom:0px;
+}
+
+@media only screen and (max-device-width: 640px)
+{
+    .transactions-container
+    {
+        overflow:auto;
+    }
+}

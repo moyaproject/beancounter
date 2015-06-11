@@ -1,0 +1,77 @@
+<img style="float:right;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png">
+
+<div class="row">
+    <div class="col-md-9">
+        <h1>
+            ${.settings.project_title}
+            <small>${.apps.currency.lib.version}</small>
+        </h1>
+
+        <p>
+        This is an experimental <i>virtual currency</i> application, with all the features of online banking.
+        </p>
+
+        <p>
+        For a limited time only, I will send you <b>100.00</b> of essentially worthless virtual currency. Just fill in this form:
+        </p>
+
+        {% if form.ok %}
+        <div class="alert alert-success">
+        <p>
+        <b>Email sent!</b>
+        </p>
+        <p>
+        Check your spam folder if it doesn't arrive within a minute or so.
+        </p>
+        </div>
+        {% else %}
+        {% if .request.cookies.ewvc3 %}
+        <div class="alert alert-info">
+            <p>
+                <strong>You can requests some more essentially worthless virtual currency in ${localize:(datetime:.request.cookies.ewvc3 - .now.local)}</strong>
+            </p>
+            <p>
+               Can't wait? <a href="{% url 'feedback' from 'moya.feedback' %}">Ask for more EWVC here</a>.
+            </p>
+        </div>
+        {% else %}
+        {% render form %}
+        {% endif %}
+        {% endif %}
+
+        <p class="text-warning">
+        <i>Want more essentially worthless virtual currency?</i>
+        </p>
+        <p>
+        No problem. Send user <tt>@will</tt> <b>1.00</b> of essentially worthless currency with a messages asking for more.
+        </p>
+        <p>
+        Mention this project in a comment / blog post and I will send you an extremely large amount of essentially worthless virtual currency.
+        </p>
+
+        <p class="text-warning">
+        <i>What is the point?</i>
+        </p>
+
+        <p>
+        This is a <i>self hosted</i> web application which can be used to manage debt where cash is not practical or desirable. For example, as a form of <a href="https://en.wikipedia.org/wiki/Local_currency">community currency</a>. It could also be used to keep track of chores within a family, student accommodation etc.
+        </p>
+
+        <p class="text-warning">
+        <i>Is this like Bitcoin?</i>
+        </p>
+
+        <p>
+        No. There is nothing de-centralized about this; you would need to trust the individual / group / organization running the virtual currency server.
+        </p>
+
+        <p class="text-warning">
+        <i>Can I use it now?</i>
+        </p>
+
+        <p>
+        Sure. But as beta software, there will likely be a few glitches to work out.
+        </p>
+
+    </div>
+</div>
