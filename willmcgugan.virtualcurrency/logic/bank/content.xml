@@ -97,7 +97,7 @@
                     Send
                 </w:button-link>
             </html:h2>
-            <node template="bank/currencyinfo.html" let:currency="currency" />
+            <node template="bank/currencyinfo.html" let:currency="currency" let:account="account" />
 
             <html:h3>
                 Money Supply

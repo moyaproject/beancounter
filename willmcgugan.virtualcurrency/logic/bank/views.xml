@@ -24,6 +24,7 @@
 
     <view libname="view.bank.currency" content="#content.bank.currency">
         <db:get-required model="#Currency" let:slug=".url.currency" dst="currency" />
+        <currency:get-mint-account currency="currency" dst="account"/>
         <get-enum enum="#enum.transaction.type" dst="types"/>
         <db:query model="#Transaction"
             let:type="int:types.mint"
