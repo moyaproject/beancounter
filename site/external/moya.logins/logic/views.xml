@@ -151,7 +151,7 @@
 
         <redirect name="login" from="moya.auth"
             query="fwd=.session.login_fwd or '/',error='nouser',provider=.url.provider" if="not user"/>
-        <get-url name="login" dst="login_url"/>
+        <get-url name="login" dst="login_url" let:provider=".url.provider"/>
         <redirect-to url="/" if=".session.login_fwd==login_url" />
         <redirect-to url="${.session.login_fwd or '/'}"/>
 

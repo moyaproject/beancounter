@@ -1,12 +1,12 @@
 "path","md5","auth md5"
-"/lib.ini",38ecddd1b4963a6740dd4d7b60a269cf,32677bf65c086b7b0c4daf55c2afdcfa
+"/lib.ini",69d799d489b3d8053080fa7bc36a8057,4a14c0ccb4412c3600a196039b9d4ca8
 "/__init__.py",e54925e1ed3818adfd6c00bffa62f89d,07f2dead3bac69c65db162b2f4aba71c
 "/logic/commands.xml",9b09d277141353f6ec51c739673f4c59,b2ce1e16c9ff51b71a55db75d95014a4
 "/logic/admin.xml",4e7fd1fb63ff5f375bd05a0e8dfb9f6a,e88deedb6aa39917a47f8f790544df25
 "/logic/widgets.xml",e0c6cd718d1fc5d35cb02fe35cf7da65,2c70899451a0e7bf81361d6a85eb7491
 "/logic/mountpoints.xml",e0306236238e4c9df934e87c791643aa,9610732aa661cae7505768b31f9cd20d
 "/logic/models.xml",735333512add1e69225218c738daf443,5e10cc2bbeec78cfe8a5cd00b63608af
-"/logic/views.xml",c3b752adfc1cc76fa06ca3d44dfa29da,38faf94525605cb2115b5fae16a341ad
+"/logic/views.xml",243c0580ab665a7dd1ec03fee0b6ecba,5c106e570d9c86c631530e43aff428aa
 "/logic/macros.xml",112e75105d7ea86a4fd35bd5a135f003,bd7d3744225d4598acd317d0cebdfff1
 "/logic/content.xml",4f14f3638d0837f77bbfd4009a7419f4,6467fbace0a5220f5434a5ea96396c64
 "/logic/profile.xml",1f0ba9a267292b48009ef3c53b179122,fc2053e875f2fe7ac5a33f3c0dfd9f33
