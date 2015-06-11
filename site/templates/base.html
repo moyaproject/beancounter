@@ -139,7 +139,7 @@ code {
                 {%- if .user %}
                 <span class="glyphicon glyphicon-user"></span>
                 <a href="{% url 'user_edit' from 'moya.auth' %}" class="navbar-link"><tt>@${.user.username}</tt></a>&nbsp;
-                <span class="hidden-md hidden-sm">
+                <span>
                     <span class="glyphicon glyphicon-log-out"></span>
                     <a href="${.urls.auth.logout}?fwd=${.request.path}" class="navbar-link">Sign out</a>
                 </span>
