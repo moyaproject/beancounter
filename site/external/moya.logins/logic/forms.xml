@@ -87,7 +87,7 @@
     <form libname="form.pick_username" xmlns="http://moyaproject.com/forms" style="horizontal" class="moya-logins-pick-username well">
         <moya:include-css path="css/logins.css"/>
         <input label="Username" name="username" initial="username" required="yes"/>
-        <submit-button text="Create Account" class="btn-success"/>
+        <submit-button text="Create Account" visual="success" block="yes"/>
     </form>
 
 </moya>

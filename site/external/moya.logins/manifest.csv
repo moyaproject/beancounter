@@ -1,5 +1,5 @@
 "path","md5","auth md5"
-"/lib.ini",a8e72c610d7cd04111778fae48b40cbb,c201a70890e88845b7435d3d8c75a730
+"/lib.ini",38ecddd1b4963a6740dd4d7b60a269cf,32677bf65c086b7b0c4daf55c2afdcfa
 "/__init__.py",e54925e1ed3818adfd6c00bffa62f89d,07f2dead3bac69c65db162b2f4aba71c
 "/logic/commands.xml",9b09d277141353f6ec51c739673f4c59,b2ce1e16c9ff51b71a55db75d95014a4
 "/logic/admin.xml",4e7fd1fb63ff5f375bd05a0e8dfb9f6a,e88deedb6aa39917a47f8f790544df25
@@ -10,7 +10,7 @@
 "/logic/macros.xml",112e75105d7ea86a4fd35bd5a135f003,bd7d3744225d4598acd317d0cebdfff1
 "/logic/content.xml",4f14f3638d0837f77bbfd4009a7419f4,6467fbace0a5220f5434a5ea96396c64
 "/logic/profile.xml",1f0ba9a267292b48009ef3c53b179122,fc2053e875f2fe7ac5a33f3c0dfd9f33
-"/logic/forms.xml",5eb91800fcd96d7c40d0344c6ea4228f,1d58d5870abcecdcbe7288abb6d8b585
+"/logic/forms.xml",2558c1dae3ce5e8e416a624ad7ada5af,c1b309ae7cf6103aca19962edee575a5
 "/locale/readme.txt",06c4fce01453459edb43d2857ebcc873,c44a09c4f28517782589988dd758c62e
 "/data/moya.logins/providers.json",fd0f0b3e8ba408bc87e16b80c04d0aef,0ab79db20fab26536ff7ea9cf5c71fc1
 "/templates/moya.auth/login_container.html",5ec15ab380c279f8d976b48f2ddcf54e,4fd5531b478dfdee5cb3558db34032e2
