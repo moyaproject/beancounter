@@ -13,7 +13,7 @@ Send when a user receives funds
 <p>Dear Sir/Madam,</p>
 {%- end %}
 
-<p>You have been sent ${email.amount|"amount"(currency=email.account.currency)} by ${email.sender.display_name}.</p>
+<p>You have been sent <strong>${email.amount|"amount"(currency=email.account.currency)}</strong> by ${email.sender.display_name}.</p>
 
 {%- if email.notes %}
 <p>The sender attached the following message&hellip;</p>
@@ -27,7 +27,7 @@ Send when a user receives funds
 
 <p>
 --<br/>
-<a href="${.request.host_url}">$(.settings.project_title}</a>
+<a href="${.request.host_url}">${.settings.project_title}</a>
 </p>
 
 {% end-block %}
