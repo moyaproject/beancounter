@@ -147,6 +147,18 @@ li.transaction:hover
     background-color:#111;
 }
 
+
+.currency-balance
+{
+
+}
+
+.currency-balance .currency-title:hover
+{
+    text-decoration: underline;
+    cursor:help;
+}
+
 .currency-balance .alert
 {
     width:50%;

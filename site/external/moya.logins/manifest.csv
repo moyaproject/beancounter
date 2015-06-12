@@ -1,16 +1,16 @@
 "path","md5","auth md5"
-"/lib.ini",69d799d489b3d8053080fa7bc36a8057,4a14c0ccb4412c3600a196039b9d4ca8
+"/lib.ini",179ee95c4a5956cbc92a8970978e3bbf,886d966485026cc81a8b60fb919d47f1
 "/__init__.py",e54925e1ed3818adfd6c00bffa62f89d,07f2dead3bac69c65db162b2f4aba71c
 "/logic/commands.xml",9b09d277141353f6ec51c739673f4c59,b2ce1e16c9ff51b71a55db75d95014a4
 "/logic/admin.xml",4e7fd1fb63ff5f375bd05a0e8dfb9f6a,e88deedb6aa39917a47f8f790544df25
 "/logic/widgets.xml",e0c6cd718d1fc5d35cb02fe35cf7da65,2c70899451a0e7bf81361d6a85eb7491
 "/logic/mountpoints.xml",e0306236238e4c9df934e87c791643aa,9610732aa661cae7505768b31f9cd20d
 "/logic/models.xml",735333512add1e69225218c738daf443,5e10cc2bbeec78cfe8a5cd00b63608af
-"/logic/views.xml",243c0580ab665a7dd1ec03fee0b6ecba,5c106e570d9c86c631530e43aff428aa
+"/logic/views.xml",55854f90b686f1df4f297bdc7052c1d6,e0cf9e47389421c73447e5ac40d8b77a
 "/logic/macros.xml",112e75105d7ea86a4fd35bd5a135f003,bd7d3744225d4598acd317d0cebdfff1
 "/logic/content.xml",4f14f3638d0837f77bbfd4009a7419f4,6467fbace0a5220f5434a5ea96396c64
-"/logic/profile.xml",1f0ba9a267292b48009ef3c53b179122,fc2053e875f2fe7ac5a33f3c0dfd9f33
-"/logic/forms.xml",2558c1dae3ce5e8e416a624ad7ada5af,c1b309ae7cf6103aca19962edee575a5
+"/logic/profile.xml",101e3824b1b5796925138ee7d2c8f026,76cdab11c8158e6c102332ec840c4c5e
+"/logic/forms.xml",c696fec9c8cb8df5325420323dd25b09,9ae0a2d6b942e1cf976afcee626144cf
 "/locale/readme.txt",06c4fce01453459edb43d2857ebcc873,c44a09c4f28517782589988dd758c62e
 "/data/moya.logins/providers.json",fd0f0b3e8ba408bc87e16b80c04d0aef,0ab79db20fab26536ff7ea9cf5c71fc1
 "/templates/moya.auth/login_container.html",5ec15ab380c279f8d976b48f2ddcf54e,4fd5531b478dfdee5cb3558db34032e2

@@ -2,6 +2,9 @@
 
     <!-- Handles a given currency -->
     <mountpoint name="bank" libname="mountpoint.bank">
+        <url route="/*">
+            <forbidden if="not .user"/>
+        </url>
         <url route="/" view="#view.bank" name="bank" />
         <url route="/manage/{currency}/" view="#view.bank.currency" name="bank_currency"/>
         <url route="/edit/{currency}/" view="#view.bank.edit" name="bank_edit_currency"/>

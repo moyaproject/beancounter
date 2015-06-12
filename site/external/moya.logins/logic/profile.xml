@@ -66,6 +66,7 @@
             <auth:new-user
                 username="username"
                 email="profile.email"
+                email_validated="yes"
                 first_name="profile.first_name or None"
                 last_name="profile.last_name or None"
                 password="None"
