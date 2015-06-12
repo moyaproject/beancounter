@@ -335,7 +335,7 @@
                 notes="claim.notes"
                 reference="claim.reference"
                 dst="transaction"/>
-            <let claim.account.reserved="claim.account.reserved + amount"/>
+            <let claim.account.reserved="claim.account.reserved - amount"/>
 
             <db:delete src="claim" />
         </db:atomic>
