@@ -95,7 +95,7 @@
 
             <case>@</case>
             <let q="dropchar:filter_q"/>
-            <db:query src="transactions" filter="#Transaction.sender.username==q or #Transaction.recipient.username==q" dst="transactions"/>
+            <db:query src="transactions" filter="#Transaction.sender.username ~= q or #Transaction.recipient.username ~= q" dst="transactions"/>
 
             <default-case/>
             <let q="filter_q" />
@@ -205,7 +205,7 @@
         <else>
             <let recipient="dropchar:recipient" if="recipient ^= '@'"/>
             <let send.sent_to="recipient"/>
-            <db:get model="moya.auth#User" let:username="recipient" dst="recipient_user"/>
+            <db:get model="moya.auth#User" filter="moya.auth#User.username ~= recipient" dst="recipient_user"/>
             <if test="recipient_user == .user and not allow_self">
                 <forms:error src="form" if="recipient_user == .user">Can't send to yourself!</forms:error>
                 <done/>

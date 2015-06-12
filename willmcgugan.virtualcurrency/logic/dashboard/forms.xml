@@ -151,7 +151,7 @@
         <auto:complete libname="input.recipient" field="recipient" xmlns="http://moyaproject.com" results_template="recipient_results.html">
             <let input="last:partition:[input, '@']" if="input ^= '@'" />
             <return if="len:input gt 1">
-                <db:query model="moya.auth#User" filter="moya.auth#User.username contains input" maxresults="20"/>
+                <db:query model="moya.auth#User" filter="moya.auth#User.username icontains input" maxresults="20"/>
             </return>
             <return if="len:input == 1">
                 <db:query model="moya.auth#User" filter="moya.auth#User.username ^= input" maxresults="20"/>
