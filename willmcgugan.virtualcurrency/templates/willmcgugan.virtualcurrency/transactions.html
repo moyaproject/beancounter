@@ -10,7 +10,7 @@
             <div class="year">${transaction.sent % 'YYYY'}</div>
         </td>
         <td class="transaction-sender">
-        {% render transaction.sender == .user ? transaction.recipient | transaction.sender %}
+        {% render transaction.sender == .user ? transaction.recipient : transaction.sender %}
         {% if transaction.reference %}
             <div class="transaction-reference">
                 ${transaction.reference}
