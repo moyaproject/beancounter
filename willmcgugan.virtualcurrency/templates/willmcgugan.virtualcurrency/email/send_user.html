@@ -14,7 +14,7 @@ Sent when a user sends funds to another user
 <p>${transaction.sender.display_name} attached the following message&hellip;</p>
 
 <blockquote>
-<pre>${transaction.notes}</pre>
+<pre>{% markup transaction.notes as 'text' set linkify=yes %}</pre>
 </blockquote>
 {%- endif %}
 

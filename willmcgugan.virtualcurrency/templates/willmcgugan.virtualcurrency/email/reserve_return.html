@@ -26,7 +26,7 @@ The reference was: <tt>${reserve.reference}</tt>
 {%- if reserve.notes %}
 <p>You attached the following note:</p>
 <blockquote>
-<pre>${reserve.notes}</pre>
+<pre>${% markup reserve.notes as 'text' set linkify=yes %}</pre>
 </blockquote>
 {%- endif %}
 

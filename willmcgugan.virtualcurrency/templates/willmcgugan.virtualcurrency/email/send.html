@@ -19,7 +19,7 @@ Send when a user receives funds
 <p>The sender attached the following message&hellip;</p>
 
 <blockquote>
-<pre>${email.notes}</pre>
+<pre>{% markup email.notes as 'text' set linkify=yes %}</pre>
 </blockquote>
 {%- end-if %}
 
