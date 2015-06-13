@@ -76,6 +76,7 @@
 
     <content libname="moya.auth#content.login">
         <title>Log In</title>
+
         <section name="body">
             <node template="login_container.html">
                 <w:info if=".user">

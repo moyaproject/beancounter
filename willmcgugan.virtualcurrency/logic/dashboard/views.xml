@@ -209,7 +209,7 @@
         <else>
             <let recipient="dropchar:recipient" if="recipient ^= '@'"/>
             <let send.sent_to="recipient"/>
-            <db:get model="moya.auth#User" filter="moya.auth#User.username ~= recipient" dst="recipient_user"/>
+            <db:get model="moya.auth#User" let:username="recipient" dst="recipient_user"/>
             <if test="recipient_user == .user and not allow_self">
                 <forms:error src="form" if="recipient_user == .user">Can't send to yourself!</forms:error>
                 <done/>
