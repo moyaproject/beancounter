@@ -10,3 +10,4 @@
 .eggs
 .tox
 build/
+site/local.ini

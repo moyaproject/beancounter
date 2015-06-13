@@ -18,6 +18,10 @@
         <db:query columns="#Currency,sum:#Account.balance" dst="balances"
             filter="#Account.id in wallet.accounts" orderby="#Account.currency.title"
             groupby="#Account.currency" collect="list"/>
+        <db:query
+            model="#Transaction" dst="transactions" collect="set" orderby="sent"
+            filter="#Transaction.sender.id in wallet.accounts or #Transaction.recipient.id in wallet.accounts"
+            maxresults="10"/>
 
     </view>
 

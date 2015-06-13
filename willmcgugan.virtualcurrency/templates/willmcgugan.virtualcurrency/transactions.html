@@ -1,6 +1,5 @@
 {# Renders recent transactions in the accounts page #}
 {% if transactions %}
-
 <table class="currency-transactions">
 {% for transaction in transactions %}
 <tr class="transaction" title="click for details" onclick="window.location.href='{% url 'view_transaction' with identity=transaction.identity %}';">
@@ -22,12 +21,12 @@
     {% endif %}
     </td>
     <td class="transaction-notes hidden-xs"><p>${linebreaks:(transaction.notes or '')}</p></td>
-    {%- if transaction.type == .app.enum.transaction_type.transfer %}
+    {%- if transaction.type == .app.enum.transaction_type.transfer or transaction.sender == transaction.recipient %}
     <td class="amount credit text-muted">
-    ${account==transaction.destination ? '+' : '-'}${transaction.amount::',.2f'}
+    ${transaction.destination in accounts ? '+' : '-'}${transaction.amount::',.2f'}
     {%- else %}
-    <td {% attrib class=['amount', account==transaction.source ? 'debit text-danger' : 'credit text-success'] %}>
-    ${account==transaction.destination ? '+' : '-'}${transaction.amount::',.2f'}
+    <td {% attrib class=['amount', transaction.source in accounts ? 'debit text-danger' : 'credit text-success'] %}>
+    ${transaction.destination in accounts ? '+' : '-'}${transaction.amount::',.2f'}
     {% endif %}
     </td>
 </tr>

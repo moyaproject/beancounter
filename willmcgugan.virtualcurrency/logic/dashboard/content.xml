@@ -26,6 +26,11 @@
         </section>
         <section name="content">
             <node template="balances.html" let:balances="balances"/>
+            <html:h3>
+                Recent Transactions
+                <html:small>last 10 transactions</html:small>
+            </html:h3>
+            <node template="transactions.html" let:accounts="set:wallet.accounts" let:transactions="transactions" />
         </section>
         <section name="side">
             <blog:recent-posts/>
@@ -167,7 +172,7 @@
                 </html:small>
             </html:h3>
             <w:paginate src="transactions" auto="no" fragment="transactions">
-                <node template="transactions.html" let:account="account" let:transactions="pagination.objects" />
+                <node template="transactions.html" let:accounts="[account]" let:transactions="pagination.objects" />
             </w:paginate>
 
         </section>
@@ -439,12 +444,14 @@
                 <w:link name="view_transaction" let:identity="transaction.identity">${transaction.identity}</w:link>
             </w:breadcrumbs>
             <node template="transaction.html" let:transaction="transaction"/>
-            <w:button-link name="transactions">
-                Back to Transactions
-            </w:button-link>
-            <w:button-link name="view_account" let:number="transaction.source|'canmanage' ? transaction.source.number : transaction.destination.number">
-                Back to Account
-            </w:button-link>
+            <html:p>
+                <w:button-link name="transactions">
+                    Back to Transactions
+                </w:button-link>
+                <w:button-link name="view_account" let:number="transaction.source|'canmanage' ? transaction.source.number : transaction.destination.number">
+                    Back to Account
+                </w:button-link>
+            </html:p>
         </section>
     </content>
 
