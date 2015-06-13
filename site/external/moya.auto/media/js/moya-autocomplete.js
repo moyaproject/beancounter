@@ -78,7 +78,7 @@
                     selection = -1;
                     max_result = results.count - 1;
                     $results.html(results.html);
-                    if(results.count>=0)
+                    if(results.count >= 0 && $input.is(':focus'))
                     {
                         $results.show();
                     }
