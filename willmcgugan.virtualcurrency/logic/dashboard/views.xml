@@ -20,7 +20,7 @@
             groupby="#Account.currency" collect="list"/>
         <db:query
             model="#Transaction" dst="transactions" collect="list" orderby="-sent"
-            filter="#Transaction.sender.id in wallet.accounts or #Transaction.recipient.id in wallet.accounts"
+            filter="#Transaction.source.id in wallet.accounts or #Transaction.destination.id in wallet.accounts"
             maxresults="10"/>
 
     </view>
