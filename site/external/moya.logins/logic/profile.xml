@@ -99,7 +99,7 @@
         <log-info>created ${provider} user ${user}</log-info>
 
         <auth:login-user user="user"/>
-        <pop src=".session" key="'oauth_profile'"/>
+        <let .session.oauth_profile="None"/>
         <db:commit/>
         <return value="user"/>
 
