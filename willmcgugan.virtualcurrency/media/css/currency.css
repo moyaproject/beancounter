@@ -88,7 +88,7 @@ td.transaction-notes p
 .transaction-view-notes
 {
     color:#bbb;
-    white-space:pre;
+    /*white-space:pre;*/
 }
 
 .transaction-date .date
