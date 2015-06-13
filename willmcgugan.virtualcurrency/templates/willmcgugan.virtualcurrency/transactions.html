@@ -1,37 +1,41 @@
 {# Renders recent transactions in the accounts page #}
 {% if transactions %}
-<table class="currency-transactions">
-{% for transaction in transactions %}
-<tr class="transaction" title="click for details" onclick="window.location.href='{% url 'view_transaction' with identity=transaction.identity %}';">
-    <td class="transaction-date text-info" style="width:120px">
-        <div class="date">${transaction.sent % 'dd'}</div>
-        <div class="month">${transaction.sent % 'MMM'}</div>
-        <div class="year">${transaction.sent % 'YYYY'}</div>
-    </td>
-    <td class="transaction-sender">
-    {# {% render transaction.sender %} &rarr; #} {% render transaction.recipient %}
-    {% if transaction.reference %}
-        <div class="transaction-reference">
-            ${transaction.reference}
-        </div>
-    {% else %}
-        <div class="transaction-reference">
-            <em>no reference</em>
-        </div>
-    {% endif %}
-    </td>
-    <td class="transaction-notes hidden-xs"><p>${linebreaks:(transaction.notes or '')}</p></td>
-    {%- if transaction.type == .app.enum.transaction_type.transfer or transaction.sender == transaction.recipient %}
-    <td class="amount credit text-muted">
-    ${transaction.destination in accounts ? '+' : '-'}${transaction.amount::',.2f'}
-    {%- else %}
-    <td {% attrib class=['amount', transaction.source in accounts ? 'debit text-danger' : 'credit text-success'] %}>
-    ${transaction.destination in accounts ? '+' : '-'}${transaction.amount::',.2f'}
-    {% endif %}
-    </td>
-</tr>
-{% endfor %}
-</table>
+<div class="currency-transactions-container">
+    <table class="currency-transactions">
+    {% for transaction in transactions %}
+    <tr class="transaction" title="click for details" onclick="window.location.href='{% url 'view_transaction' with identity=transaction.identity %}';">
+        <td class="transaction-date text-info" style="width:120px">
+            <div class="date">${transaction.sent % 'dd'}</div>
+            <div class="month">${transaction.sent % 'MMM'}</div>
+            <div class="year">${transaction.sent % 'YYYY'}</div>
+        </td>
+        <td class="transaction-sender">
+        {% render transaction.recipient %}
+        {% if transaction.reference %}
+            <div class="transaction-reference">
+                ${transaction.reference}
+            </div>
+        {% else %}
+            <div class="transaction-reference">
+                <em>no reference</em>
+            </div>
+        {% endif %}
+        </td>
+        {% with self=transaction.sender == transaction.recipient %}
+        <td class="transaction-notes hidden-xs"><p>${linebreaks:(transaction.notes or '')}</p></td>
+        {%- if transaction.type == .app.enum.transaction_type.transfer or self %}
+        <td class="amount credit text-muted">
+        {% if not self %}${transaction.destination in accounts ? '+' : '-'}{% endif %}${transaction.amount::',.2f'}
+        {%- else %}
+        <td {% attrib class=['amount', transaction.source in accounts ? 'debit text-danger' : 'credit text-success'] %}>
+        ${transaction.destination in accounts ? '+' : '-'}${transaction.amount::',.2f'}
+        {% endif %}
+        </td>
+        {% end-with %}
+    </tr>
+    {% endfor %}
+    </table>
+</div>
 
 {% else %}
 <em>no recent transactions</em>

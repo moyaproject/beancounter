@@ -20,6 +20,11 @@ td.currency
     margin-bottom:0px;
 }
 
+.currency-transactions-container
+{
+    width:100%;
+    overflow:auto;
+}
 
 .currency-transactions
 {

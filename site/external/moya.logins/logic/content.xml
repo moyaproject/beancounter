@@ -76,7 +76,6 @@
 
     <content libname="moya.auth#content.login">
         <title>Log In</title>
-
         <section name="body">
             <node template="login_container.html">
                 <w:info if=".user">
@@ -84,6 +83,18 @@
                         You are currently signed in as **${.user.username}**
                     </markdown>
                 </w:info>
+                <if test=".libs['moya.signup'] and validate_email">
+                    <w:well>
+                        <markdown>
+                            We sent you an email with a link to verify your email address.
+
+                            If you didn't receive the email, please check your spam folder, or click the button below to re-send.
+                        </markdown>
+                        <w:button-link name="send_validate_email" app="moya.signup" let:username="form.data.username">
+                            Send Again
+                        </w:button-link>
+                    </w:well>
+                </if>
                 <render src="form" />
             </node>
         </section>

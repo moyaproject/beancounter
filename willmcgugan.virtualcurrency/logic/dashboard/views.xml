@@ -19,7 +19,7 @@
             filter="#Account.id in wallet.accounts" orderby="#Account.currency.title"
             groupby="#Account.currency" collect="list"/>
         <db:query
-            model="#Transaction" dst="transactions" collect="set" orderby="sent"
+            model="#Transaction" dst="transactions" collect="list" orderby="-sent"
             filter="#Transaction.sender.id in wallet.accounts or #Transaction.recipient.id in wallet.accounts"
             maxresults="10"/>
 
