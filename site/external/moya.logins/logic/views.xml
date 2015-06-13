@@ -170,11 +170,12 @@
     </view>
 
     <view libname="view.pick_username" content="#content.pick_username">
+        <not-found if="not .session.oauth_profile" />
         <forms:get form="#form.pick_username" dst="form" let:username=".request.GET.username"/>
         <forms:validate src="form">
             <db:get model="moya.auth#User" let:username="form.data.username" dst="user" />
             <if test="user">
-                <forms:error>Sorry, that username is taken! Please pick another.</forms:error>
+                <forms:error>Sorry, that username is taken. Please pick another.</forms:error>
                 <done/>
             </if>
 
