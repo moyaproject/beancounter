@@ -41,7 +41,7 @@
         <decimal name="balance" default="0" blank="no"/>
         <decimal name="reserved" default="0" blank="no"/>
         <boolean name="default" default="no" />
-        <text name="notes" null="no" default="no" />
+        <text name="notes" null="no" default="" />
         <boolean name="closed" default="no" />
 
         <property name="spendable" expression="balance-reserved" />
