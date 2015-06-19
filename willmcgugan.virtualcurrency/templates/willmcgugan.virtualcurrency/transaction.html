@@ -5,11 +5,11 @@
     <dt>Recipient</dt>
     <dd>{% render transaction.recipient with link=yes %}</dd>
     <dt>Reference</dt>
-    {% if transaction.reference %}
+    {%- if transaction.reference %}
     <dd>${transaction.reference}</dd>
-    {% else %}
+    {%- else %}
     <dd><em>no reference</em></dd>
-    {% endif %}
+    {%- endif %}
     <dt>Type</dt>
     <dd>${upper:str:self.app.enum.transaction_type[transaction.type]}</dd>
     <dt>Sent</dt>

@@ -28,6 +28,7 @@
         <import py="moya.libs.wysihtml5"/>
         <import py="moya.libs.recaptcha"/>
         <import py="moya.libs.tables"/>
+        <import py="moya.libs.errors"/>
 
 
 
@@ -52,6 +53,7 @@
         <install name="wysihtml5" lib="moya.wysihtml5"/>
         <install name="recaptcha" lib="moya.google.recaptcha"/>
         <install name="tables" lib="moya.tables"/>
+        <install name="errors" lib="moya.errors"/>
 
         <!--Added by 'moya start library'-->
         <import location="../willmcgugan.virtualcurrency" priority="10"/>
