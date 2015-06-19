@@ -28,8 +28,7 @@
         <import py="moya.libs.wysihtml5"/>
         <import py="moya.libs.recaptcha"/>
         <import py="moya.libs.tables"/>
-        <import py="moya.libs.errors"/>
-
+        <import py="moya.libs.diagnostics"/>
 
 
         <!-- Install applications (instances of a library) -->
@@ -53,20 +52,16 @@
         <install name="wysihtml5" lib="moya.wysihtml5"/>
         <install name="recaptcha" lib="moya.google.recaptcha"/>
         <install name="tables" lib="moya.tables"/>
-        <install name="errors" lib="moya.errors"/>
+        <install name="diagnostics" lib="moya.diagnostics"/>
 
         <!--Added by 'moya start library'-->
         <import location="../willmcgugan.virtualcurrency" priority="10"/>
         <install name="currency" lib="willmcgugan.virtualcurrency"/>
 
-        <mount app="currency" url="/currency/" mountpoint="currency" let:currency=".apps.currency.settings.default_currency"/>
+        <mount app="currency" url="/currency/" mountpoint="currency"
+            let:currency=".apps.currency.settings.default_currency"/>
         <mount app="currency" url="/dashboard/" mountpoint="dashboard"/>
         <mount app="currency" url="/bank/" mountpoint="bank"/>
-
-        <!--
-        <install name="currency_admin" lib="moya.admin" />
-        <mount app="currency_admin" url="/currency-admin/" />
-    -->
 
         <install name="logins" lib="moya.logins" mount="/login/"/>
         <install name="fontawesome" lib="moya.fontawesome"/>
