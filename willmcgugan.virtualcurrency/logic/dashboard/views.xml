@@ -6,10 +6,8 @@
       xmlns:currency="http://willmcgugan.com/currency"
       xmlns:email="http://moyaproject.com/email">
 
-
     <view libname="view.front" content="#content.front">
     </view>
-
 
     <view libname="view.dashboard.balances" content="#content.dashboard.balances">
         <db:get-required model="#Currency" let:slug=".app.settings.default_currency" dst="currency" />

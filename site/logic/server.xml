@@ -32,7 +32,6 @@
         <import py="moya.libs.tables"/>
 
 
-
         <!-- Install applications (instances of a library) -->
         <install name="forms" lib="moya.forms"/>
         <install name="widgets" lib="moya.widgets"/>
@@ -60,14 +59,10 @@
         <import location="../willmcgugan.virtualcurrency" priority="10"/>
         <install name="currency" lib="willmcgugan.virtualcurrency"/>
 
-        <mount app="currency" url="/currency/" mountpoint="currency" let:currency=".apps.currency.settings.default_currency"/>
+        <mount app="currency" url="/currency/" mountpoint="currency"
+            let:currency=".apps.currency.settings.default_currency"/>
         <mount app="currency" url="/dashboard/" mountpoint="dashboard"/>
         <mount app="currency" url="/bank/" mountpoint="bank"/>
-
-        <!--
-        <install name="currency_admin" lib="moya.admin" />
-        <mount app="currency_admin" url="/currency-admin/" />
-    -->
 
         <install name="logins" lib="moya.logins" mount="/login/"/>
         <install name="fontawesome" lib="moya.fontawesome"/>
