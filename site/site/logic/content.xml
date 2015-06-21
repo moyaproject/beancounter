@@ -13,6 +13,15 @@
 
     <content libname="content.base" template="/base.html">
         <links:get dst="navlinks" />
+        <include-css path="theme/material/css/material-fullpalette.min.css" />
+        <include-css path="theme/material/css/ripples.css" />
+        <include-js path="theme/material/js/material.min.js"/>
+        <include-js path="theme/material/js/ripples.min.js"/>
+        <js>
+            $(document).ready(function() {
+                $.material.init();
+            });
+        </js>
     </content>
 
     <content libname="content.front" extends="#content.base">

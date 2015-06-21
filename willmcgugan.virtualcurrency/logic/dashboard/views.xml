@@ -22,7 +22,6 @@
             model="#Transaction" dst="transactions" collect="list" orderby="-sent"
             filter="#Transaction.source.id in wallet.accounts or #Transaction.destination.id in wallet.accounts"
             maxresults="10"/>
-        <echo>${1/0}</echo>
     </view>
 
     <view libname="view.dashboard.accounts" content="#content.dashboard.accounts">

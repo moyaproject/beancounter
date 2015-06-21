@@ -149,9 +149,14 @@ li.transaction:hover
 .currency-transactions .transaction:hover
 {
     cursor:pointer;
-    background-color:#111;
+    background-color:rgba(00,150,136,0.9);
+    color:white !important;
 }
 
+.currency-transactions .transaction:hover *
+{
+    color:white !important;
+}
 
 .currency-balance
 {

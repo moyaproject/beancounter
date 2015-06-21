@@ -10,6 +10,8 @@
         <!-- <import location="/home/will/projects/oauth/moya.logins/" priority="10"/> -->
 
         <import py="moya.libs.debug" if=".debug"/>
+        <import py="moya.libs.diagnostics" if="not .debug"/>
+
         <import py="moya.libs.auth"/>
         <import py="moya.libs.session"/>
         <import py="moya.libs.signup"/>
@@ -28,7 +30,6 @@
         <import py="moya.libs.wysihtml5"/>
         <import py="moya.libs.recaptcha"/>
         <import py="moya.libs.tables"/>
-        <import py="moya.libs.errors"/>
 
 
 
@@ -46,14 +47,14 @@
         <install name="links" lib="moya.links"/>
         <install name="favicon" lib="moya.favicon" mount="/"/>
         <install name="comments" lib="moya.comments" mount="/comments/"/>
-        <install name="pages" lib="moya.pages" mount="/"/>
+        <install name="pages" lib="moya.pages" mount="/" urlpriority="-10"/>
         <install name="blog" lib="moya.blog" mount="/blog/"/>
         <install name="feedback" lib="moya.feedback" mount="/feedback/"/>
         <install name="jsonrpc" lib="moya.jsonrpc"/>
         <install name="wysihtml5" lib="moya.wysihtml5"/>
         <install name="recaptcha" lib="moya.google.recaptcha"/>
         <install name="tables" lib="moya.tables"/>
-        <install name="errors" lib="moya.errors"/>
+        <install name="diagnostics" lib="moya.diagnostics" if="not .debug"/>
 
         <!--Added by 'moya start library'-->
         <import location="../willmcgugan.virtualcurrency" priority="10"/>
