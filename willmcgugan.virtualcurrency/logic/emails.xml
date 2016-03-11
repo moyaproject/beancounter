@@ -3,19 +3,19 @@
     <email libname="email.send" xmlns="http://moyaproject.com/email"
         from="${app.settings.email_from}"
         subject="You have received virtual currency">
-        <html template="email/send.html" premailer="yes"/>
+        <html template="email/send.html"/>
     </email>
 
     <email libname="email.send.user" xmlns="http://moyaproject.com/email"
         from="${app.settings.email_from}"
         subject="You have been sent virtual currency">
-        <html template="email/send_user.html" premailer="yes"/>
+        <html template="email/send_user.html"/>
     </email>
 
     <email libname="email.reserve.return" xmlns="http://moyaproject.com/email"
         from="${app.settings.email_from}"
         subject="Unclaimed currency was returned to your account">
-        <html template="email/reserve_return.html" premailer="yes"/>
+        <html template="email/reserve_return.html"/>
     </email>
 
 </moya>
